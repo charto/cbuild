@@ -27,6 +27,7 @@
   "dependencies": {
     "bluebird": "^3.3.4",
     "browser-resolve": "~1.11.1",
+    "commander": "~2.9.0",
     "systemjs-builder": "~0.15.14"
   },
   "devDependencies": {
