@@ -11,7 +11,8 @@
     "tsc": "tsc",
     "docts": "docts",
     "typings": "typings",
-    "prepublish": "typings install && tsc"
+    "prepublish": "typings install && tsc",
+    "test": "npm link cbuild && cbuild --help"
   },
   "author": "Juha Järvi",
   "license": "MIT",
