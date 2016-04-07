@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"declaration": true,
+		"experimentalDecorators": true,
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"noImplicitAny": true,
+		"outDir": "dist",
+		"removeComments": false,
+		"target": "es5"
+	},
+	"files": [
+		"typings/main.d.ts",
+
+		"src/typings-custom.d.ts",
+		"src/cbuild.ts",
+		"src/cli.ts"
+	]
+}

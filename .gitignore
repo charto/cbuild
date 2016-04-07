@@ -1,0 +1,7 @@
+node_modules/
+typings/
+*.js
+*.d.ts
+*.log.*
+*.log
+*.tgz

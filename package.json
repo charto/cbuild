@@ -1,0 +1,36 @@
+{
+  "name": "cbuild",
+  "version": "0.0.1",
+  "description": "Use SystemJS with npm instead of jspm",
+  "main": "dist/cbuild.js",
+  "typings": "dist/cbuild.d.ts",
+  "bin": {
+    "cbuild": "cbuild-cli.js"
+  },
+  "scripts": {
+    "tsc": "tsc",
+    "docts": "docts",
+    "typings": "typings",
+    "prepublish": "typings install && tsc"
+  },
+  "author": "Juha Järvi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/charto/cbuild.git"
+  },
+  "bugs": {
+    "url": "https://github.com/charto/cbuild/issues"
+  },
+  "homepage": "https://github.com/charto/cbuild#readme",
+  "dependencies": {
+    "bluebird": "^3.3.4",
+    "browser-resolve": "~1.11.1",
+    "systemjs-builder": "~0.15.14"
+  },
+  "devDependencies": {
+    "docts": "~0.0.4",
+    "typescript": "^1.8.9",
+    "typings": "~0.7.12"
+  }
+}
