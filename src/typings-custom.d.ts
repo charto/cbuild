@@ -1,3 +1,6 @@
+// This file is part of cbuild, copyright (c) 2016 BusFaster Ltd.
+// Released under the MIT license, see LICENSE.
+
 declare module 'systemjs-builder' {
 	import * as Promise from 'bluebird';
 
@@ -22,7 +25,7 @@ declare module 'systemjs-builder' {
 declare module 'browser-resolve' {
 	var resolve: (name: string, options: {
 		filename: string
-	}) => number[];
+	}) => string;
 
 	export = resolve;
 }

@@ -26,14 +26,14 @@ export function build(basePath: string, targetPath: string, sourcePath?: string)
 	builder.loader.normalize = function(name, parentName, parentAddress) {
 		var pathName: string;
 
-		return(oldNormalize.call(this, name, parentName, parentAddress).then(function(result: string) {
+		return(oldNormalize.call(this, name, parentName, parentAddress).then((result: string) => {
 			pathName = result;
 
 			return(Promise.promisify(fs.stat)(pathName.replace(/^file:\/\//, '')));
 		}).then(function() {
 			return(pathName);
-		}).catch(function(err: NodeJS.ErrnoException) {
-			return(Promise.promisify(resolve)(name, { filename: parentName }).then(function(pathName: string) {
+		}).catch((err: NodeJS.ErrnoException) => {
+			return(Promise.promisify(resolve)(name, { filename: parentName }).then((pathName: string) => {
 				return(path.relative(basePath, pathName));
 			}));
 		}));
