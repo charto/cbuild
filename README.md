@@ -14,6 +14,29 @@ This allows publishing leaner packages running without build tools.
 `npm@3` or the `dedupe` command in `npm@2` natively handles package deduplication.
 For more complicated scenarios, the full power of SystemJS is still available for loading and bundling.
 
+Usage
+-----
+
+Make sure your `package.json` has a `browser` and/or `main` field and add in the `scripts` section:
+
+```json
+  "scripts": {
+    "cbuild": "cbuild"
+  }
+```
+
+Then run the commands:
+
+```bash
+npm install --save-dev cbuild
+npm run cbuild -- bundle.js
+```
+
+This generates a new file `bundle.js` with all code required to load the file
+defined in the `browser` (or `main` if `browser` is missing) field of `package.json`.
+
+Run `cbuild --help` to see the command line options.
+
 API
 ===
 Docs generated using [`docts`](https://github.com/charto/docts)
@@ -22,8 +45,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > ### Function [`build`](#api-build)
 > <em>Bundle file in sourcePath inside package in basePath,</em>  
 > <em>writing all required code to file in targetPath.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/master/src/cbuild.ts#L13-L43)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/master/src/cbuild.ts#L13-L43)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/10610cd/src/cbuild.ts#L13-L43)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/10610cd/src/cbuild.ts#L13-L43)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 > > &emsp;&#x25aa; targetPath <sup><code>string</code></sup>  
 > > &emsp;&#x25ab; sourcePath<sub>?</sub> <sup><code>string</code></sup>  
