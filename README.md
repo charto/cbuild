@@ -11,6 +11,7 @@ This allows publishing leaner packages running without build tools.
 `npm` itself can pull all required frontend and backend dependencies.
 
 `cbuild` supports the `browser` field in `package.json`.
+It can also generate a minimal `config.js` for SystemJS to load packages without having to bundle them.
 `npm@3` or the `dedupe` command in `npm@2` natively handles package deduplication.
 For more complicated scenarios, the full power of SystemJS is still available for loading and bundling.
 
@@ -35,21 +36,42 @@ npm run cbuild -- bundle.js
 This generates a new file `bundle.js` with all code required to load the file
 defined in the `browser` (or `main` if `browser` is missing) field of `package.json`.
 
-Run `cbuild --help` to see the command line options.
+Run `npm run cbuild -- --help` to see the command line options:
+
+```
+  Usage: cbuild [options] <output-bundle-path>
+
+  SystemJS node module bundling tool
+
+  Options:
+
+    -h, --help               output usage information
+    -V, --version            output the version number
+    -p, --package <path>     Path to directory with package.json and config.js
+    -C, --out-config <path>  Path to new config.js to overwrite with path mappings
+```
 
 API
 ===
 Docs generated using [`docts`](https://github.com/charto/docts)
 >
+> <a name="api-BuildOptions"></a>
+> ### Interface [`BuildOptions`](#api-BuildOptions)
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/ee04305/src/cbuild.ts#L10-L13)  
+>  
+> Properties:  
+> > **.sourcePath**<sub>?</sub> <sup><code>string</code></sup>  
+> > **.outConfigPath**<sub>?</sub> <sup><code>string</code></sup>  
+>
 > <a name="api-build"></a>
 > ### Function [`build`](#api-build)
 > <em>Bundle file in sourcePath inside package in basePath,</em>  
 > <em>writing all required code to file in targetPath.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/10610cd/src/cbuild.ts#L13-L43)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/10610cd/src/cbuild.ts#L13-L43)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/ee04305/src/cbuild.ts#L34-L74)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/ee04305/src/cbuild.ts#L34-L74)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 > > &emsp;&#x25aa; targetPath <sup><code>string</code></sup>  
-> > &emsp;&#x25ab; sourcePath<sub>?</sub> <sup><code>string</code></sup>  
+> > &emsp;&#x25ab; options<sub>?</sub> <sup><code>[BuildOptions](#api-BuildOptions)</code></sup>  
 
 License
 =======
