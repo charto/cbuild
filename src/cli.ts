@@ -15,6 +15,7 @@ interface ICommand extends _ICommand {
 	.arguments('<output-bundle-path>')
 	.description('SystemJS node module bundling tool')
 	.option('-p, --package <path>', 'Path to directory with package.json and config.js', process.cwd())
+	.option('-C, --out-config <path>', 'Path to new config.js to overwrite with path mappings')
 	.action(handleBundle)
 	.parse(process.argv)
 );
@@ -24,7 +25,9 @@ if(process.argv.length < 3) cmd.help();
 function handleBundle(targetPath: string, opts: { [key: string]: any }) {
 	var basePath = path.resolve('.', opts['package']);
 
-	build(basePath, targetPath).then(() => {
+	build(basePath, targetPath, {
+		outConfigPath: opts['outConfig']
+	}).then(() => {
 		console.log('Build complete!');
 	}).catch((err) => {
 		console.log('Build error:');
