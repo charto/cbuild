@@ -23,8 +23,6 @@ function writeConfig(configPath: string, pathTbl: { [name: string]: string }) {
 		'});\n'
 	);
 
-	console.log(output);
-
 	return(fs.writeFileSync(configPath, output, { encoding: 'utf-8' }));
 }
 

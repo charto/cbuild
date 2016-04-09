@@ -25,7 +25,7 @@ How does it work?
 
 `cbuild` simply passes your SystemJS `config.js` to [`systemjs-builder`](https://github.com/systemjs/builder),
 which bundles your main JavaScript file with its dependencies.
-It adds a hook to look up any missing files using [`browser-resolve`](https://github.com/defunctzombie/node-browser-resolve).
+`cbuild` adds a hook to look up any missing files using [`browser-resolve`](https://github.com/defunctzombie/node-browser-resolve).
 
 That means you can still use `jspm` as before but you don't have to reinstall all your npm packages with it,
 because `cbuild` also automatically looks inside `node_modules`.
