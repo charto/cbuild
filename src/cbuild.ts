@@ -8,9 +8,13 @@ import * as Builder from 'systemjs-builder';
 import * as resolve from 'browser-resolve';
 
 export interface BuildOptions {
+	/** Bundled file to output. */
 	bundlePath?: string;
+	/** Main source file to bundle. */
 	sourcePath?: string;
+	/** Output config mapping other package names to their main source files. */
 	outConfigPath?: string;
+	/** Map additional packages in output config. */
 	mapPackages?: string[];
 }
 
@@ -47,8 +51,7 @@ function url2path(pathName: string) {
 
 var resolveAsync = Promise.promisify(resolve);
 
-/** Bundle file in sourcePath inside package in basePath,
-  * writing all required code to file in targetPath. */
+/** Bundle files from package in basePath according to options. */
 
 export function build(basePath: string, options?: BuildOptions) {
 	var builder = new Builder(basePath, 'config.js');
