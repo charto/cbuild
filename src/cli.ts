@@ -12,26 +12,30 @@ interface ICommand extends _ICommand {
 }
 
 ((cmd.version(require('../package.json').version) as ICommand)
-	.arguments('<output-bundle-path>')
 	.description('SystemJS node module bundling tool')
-	.option('-s, --source <path>', 'main JavaScript source to bundle')
+	.option('-m, --map <package>', 'add package to mappings', (item: string, list: string[]) => list.concat([item]), [])
+	.option('-s, --source <file>', 'main JavaScript source to bundle')
 	.option('-p, --package <path>', 'directory with package.json and config.js', process.cwd())
-	.option('-C, --out-config <path>', 'new config.js to overwrite with path mappings')
-	.action(handleBundle)
+	.option('-o, --out <file>', 'write output bundle to file')
+	.option('-C, --out-config <file>', 'write path mappings to new config file')
 	.parse(process.argv)
 );
 
 if(process.argv.length < 3) cmd.help();
 
-function handleBundle(targetPath: string, opts: { [key: string]: any }) {
+handleBundle(cmd.opts());
+
+function handleBundle(opts: { [key: string]: any }) {
 	var basePath = path.resolve('.', opts['package']);
 	var sourcePath: string = opts['source'];
 
 	if(sourcePath) sourcePath = path.resolve('.', sourcePath);
 
-	build(basePath, targetPath, {
+	build(basePath, {
+		bundlePath: opts['out'],
 		sourcePath: sourcePath,
-		outConfigPath: opts['outConfig']
+		outConfigPath: opts['outConfig'],
+		mapPackages: opts['map']
 	}).then(() => {
 		console.log('Build complete!');
 	}).catch((err) => {

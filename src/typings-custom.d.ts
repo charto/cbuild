@@ -13,6 +13,7 @@ declare module 'systemjs-builder' {
 
 		loadConfig(configPath: string): Promise<void>;
 		bundle(sourcePath: string, targetPath: string, options: {}): Promise<void>;
+		bundle(sourcePath: string, options: {}): Promise<void>;
 
 		loader: Loader;
 	}

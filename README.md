@@ -78,20 +78,21 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 >
 > <a name="api-BuildOptions"></a>
 > ### Interface [`BuildOptions`](#api-BuildOptions)
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/ee04305/src/cbuild.ts#L10-L13)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/develop/src/cbuild.ts#L10-L15)  
 >  
 > Properties:  
+> > **.bundlePath**<sub>?</sub> <sup><code>string</code></sup>  
 > > **.sourcePath**<sub>?</sub> <sup><code>string</code></sup>  
 > > **.outConfigPath**<sub>?</sub> <sup><code>string</code></sup>  
+> > **.mapPackages**<sub>?</sub> <sup><code>string[]</code></sup>  
 >
 > <a name="api-build"></a>
 > ### Function [`build`](#api-build)
 > <em>Bundle file in sourcePath inside package in basePath,</em>  
 > <em>writing all required code to file in targetPath.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/ee04305/src/cbuild.ts#L34-L74)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/ee04305/src/cbuild.ts#L34-L74)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/develop/src/cbuild.ts#L36-L90)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/develop/src/cbuild.ts#L36-L90)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
-> > &emsp;&#x25aa; targetPath <sup><code>string</code></sup>  
 > > &emsp;&#x25ab; options<sub>?</sub> <sup><code>[BuildOptions](#api-BuildOptions)</code></sup>  
 
 License

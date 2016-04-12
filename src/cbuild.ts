@@ -8,8 +8,10 @@ import * as Builder from 'systemjs-builder';
 import * as resolve from 'browser-resolve';
 
 export interface BuildOptions {
+	bundlePath?: string;
 	sourcePath?: string;
 	outConfigPath?: string;
+	mapPackages?: string[];
 }
 
 function writeConfig(configPath: string, pathTbl: { [name: string]: string }) {
@@ -26,15 +28,27 @@ function writeConfig(configPath: string, pathTbl: { [name: string]: string }) {
 	return(fs.writeFileSync(configPath, output, { encoding: 'utf-8' }));
 }
 
+var resolveAsync = Promise.promisify(resolve);
+
 /** Bundle file in sourcePath inside package in basePath,
   * writing all required code to file in targetPath. */
 
-export function build(basePath: string, targetPath: string, options?: BuildOptions) {
+export function build(basePath: string, options?: BuildOptions) {
 	var builder = new Builder(basePath, 'config.js');
 	var pathTbl: { [name: string]: string } = {};
 
+	function findPackage(name: string, parentName: string) {
+		return(resolveAsync(name, { filename: parentName }).then((pathName: string) => {
+			pathName = path.relative(basePath, pathName);
+			pathTbl[name] = pathName;
+
+			return(pathName);
+		}));
+	}
+
 	options = options || {};
 
+	var bundlePath = options.bundlePath;
 	var sourcePath = options.sourcePath;
 
 	if(!sourcePath) {
@@ -54,17 +68,21 @@ export function build(basePath: string, targetPath: string, options?: BuildOptio
 			pathName = result;
 
 			return(Promise.promisify(fs.stat)(pathName.replace(/^file:\/\//, '')));
-		}).then(function() {
-			return(pathName);
-		}).catch((err: NodeJS.ErrnoException) => {
-			return(Promise.promisify(resolve)(name, { filename: parentName }).then((pathName: string) => {
-				pathTbl[name] = pathName;
-				return(path.relative(basePath, pathName));
-			}));
-		}));
+		}).then(() => pathName).catch((err: NodeJS.ErrnoException) =>
+			findPackage(name, parentName)
+		));
 	}
 
-	return(builder.bundle(sourcePath, targetPath, {}).then(() => {
+	var built: Promise<void>;
+
+	if(bundlePath) built = builder.bundle(sourcePath, bundlePath, {});
+	else built = builder.bundle(sourcePath, bundlePath, {});
+
+	return(built.then(() =>
+		Promise.map(options.mapPackages || [], (name: string) =>
+			findPackage(name, path.resolve(basePath, 'package.json'))
+		)
+	).then(() => {
 		if(options.outConfigPath) {
 			writeConfig(options.outConfigPath, pathTbl);
 		}
