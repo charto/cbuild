@@ -63,14 +63,26 @@ export function build(basePath: string, options?: BuildOptions) {
 
 	builder.loader.normalize = function(name, parentName, parentAddress) {
 		var pathName: string;
+		var indexName: string;
 
 		return(oldNormalize.call(this, name, parentName, parentAddress).then((result: string) => {
 			pathName = result;
 
 			return(Promise.promisify(fs.stat)(pathName.replace(/^file:\/\//, '')));
-		}).then(() => pathName).catch((err: NodeJS.ErrnoException) =>
-			findPackage(name, parentName)
-		));
+		}).then((stats: fs.Stats) =>
+			pathName
+		).catch((err: NodeJS.ErrnoException) => {
+			indexName = pathName.replace(/.js$/, '/index.js');
+			return(
+				Promise.promisify(fs.stat)(
+					indexName.replace(/^file:\/\//, '')
+				).then((stats: fs.Stats) =>
+					indexName
+				).catch((err: NodeJS.ErrnoException) =>
+					findPackage(name, parentName)
+				)
+			);
+		}));
 	}
 
 	var built: Promise<void>;
