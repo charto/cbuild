@@ -39,6 +39,7 @@ export function build(basePath: string, options?: BuildOptions) {
 
 	function findPackage(name: string, parentName: string) {
 		return(resolveAsync(name, { filename: parentName }).then((pathName: string) => {
+			if(pathName == name) throw(new Error('Internal module'));
 			pathName = path.relative(basePath, pathName);
 			pathTbl[name] = pathName;
 
@@ -80,6 +81,8 @@ export function build(basePath: string, options?: BuildOptions) {
 					indexName
 				).catch((err: NodeJS.ErrnoException) =>
 					findPackage(name, parentName)
+				).catch((err: any) =>
+					pathName
 				)
 			);
 		}));
