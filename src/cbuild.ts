@@ -14,18 +14,35 @@ export interface BuildOptions {
 	mapPackages?: string[];
 }
 
-function writeConfig(configPath: string, pathTbl: { [name: string]: string }) {
+function writeConfig(
+	configPath: string,
+	pathTbl: { [name: string]: string },
+	fixTbl: { [path: string]: string }
+) {
 	var output = (
 		'System.config({\n' +
 		'\tmap: {\n' +
 		Object.keys(pathTbl).map((name: string) =>
 			'\t\t"' + name + '": "' + pathTbl[name] + '"'
 		).join(',\n') + '\n' +
+		'\t},\n' +
+		'\tpackages: {\n' +
+		'\t\t".": {\n' +
+		'\t\t\tmap: {\n' +
+		Object.keys(fixTbl).map((path: string) =>
+			'\t\t\t\t"' + path + '": "' + fixTbl[path] + '"'
+		).join(',\n') + '\n' +
+		'\t\t\t}\n' +
+		'\t\t}\n' +
 		'\t}\n' +
 		'});\n'
 	);
 
 	return(fs.writeFileSync(configPath, output, { encoding: 'utf-8' }));
+}
+
+function url2path(pathName: string) {
+	return(pathName.replace(/^file:\/\//, ''));
 }
 
 var resolveAsync = Promise.promisify(resolve);
@@ -36,6 +53,7 @@ var resolveAsync = Promise.promisify(resolve);
 export function build(basePath: string, options?: BuildOptions) {
 	var builder = new Builder(basePath, 'config.js');
 	var pathTbl: { [name: string]: string } = {};
+	var fixTbl: { [path: string]: string } = {};
 
 	function findPackage(name: string, parentName: string) {
 		return(resolveAsync(name, { filename: parentName }).then((pathName: string) => {
@@ -69,17 +87,18 @@ export function build(basePath: string, options?: BuildOptions) {
 		return(oldNormalize.call(this, name, parentName, parentAddress).then((result: string) => {
 			pathName = result;
 
-			return(Promise.promisify(fs.stat)(pathName.replace(/^file:\/\//, '')));
+			return(Promise.promisify(fs.stat)(url2path(pathName)));
 		}).then((stats: fs.Stats) =>
 			pathName
 		).catch((err: NodeJS.ErrnoException) => {
 			indexName = pathName.replace(/.js$/, '/index.js');
 			return(
 				Promise.promisify(fs.stat)(
-					indexName.replace(/^file:\/\//, '')
-				).then((stats: fs.Stats) =>
-					indexName
-				).catch((err: NodeJS.ErrnoException) =>
+					url2path(indexName)
+				).then((stats: fs.Stats) => {
+					fixTbl['./' + path.relative(basePath, url2path(pathName))] = './' + path.relative(basePath, url2path(indexName));
+					return(indexName);
+				}).catch((err: NodeJS.ErrnoException) =>
 					findPackage(name, parentName)
 				).catch((err: any) =>
 					pathName
@@ -99,7 +118,7 @@ export function build(basePath: string, options?: BuildOptions) {
 		)
 	).then(() => {
 		if(options.outConfigPath) {
-			writeConfig(options.outConfigPath, pathTbl);
+			writeConfig(options.outConfigPath, pathTbl, fixTbl);
 		}
 	}));
 }

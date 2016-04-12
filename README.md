@@ -90,8 +90,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > ### Function [`build`](#api-build)
 > <em>Bundle file in sourcePath inside package in basePath,</em>  
 > <em>writing all required code to file in targetPath.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/develop/src/cbuild.ts#L36-L102)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/develop/src/cbuild.ts#L36-L102)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/develop/src/cbuild.ts#L53-L124)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/develop/src/cbuild.ts#L53-L124)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 > > &emsp;&#x25ab; options<sub>?</sub> <sup><code>[BuildOptions](#api-BuildOptions)</code></sup>  
 
