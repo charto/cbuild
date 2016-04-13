@@ -102,7 +102,7 @@ export function build(basePath: string, options?: BuildOptions) {
 					fixTbl['./' + path.relative(basePath, url2path(pathName))] = './' + path.relative(basePath, url2path(indexName));
 					return(indexName);
 				}).catch((err: NodeJS.ErrnoException) =>
-					findPackage(name, parentName)
+					findPackage(name, url2path(parentName))
 				).catch((err: any) =>
 					pathName
 				)
