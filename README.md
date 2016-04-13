@@ -39,7 +39,7 @@ It can also generate a minimal `config.js` for SystemJS to load packages without
 Usage
 -----
 
-Make sure your `package.json` has a `browser` and/or `main` field and add in the `scripts` section:
+Add in the `scripts` section of your `package.json`:
 
 ```json
   "scripts": {
@@ -51,16 +51,17 @@ Then run the commands:
 
 ```bash
 npm install --save-dev cbuild
-npm run cbuild -- bundle.js
+npm run cbuild -- -o bundle.js
 ```
 
 This generates a new file `bundle.js` with all code required to load the file
 defined in the `browser` (or `main` if `browser` is missing) field of `package.json`.
+You can also set the file on the command line with the `--source` option.
 
 Run `npm run cbuild -- --help` to see the command line options:
 
 ```
-  Usage: cbuild [options] <output-bundle-path>
+  Usage: cbuild [options]
 
   SystemJS node module bundling tool
 
@@ -68,8 +69,11 @@ Run `npm run cbuild -- --help` to see the command line options:
 
     -h, --help               output usage information
     -V, --version            output the version number
-    -p, --package <path>     Path to directory with package.json and config.js
-    -C, --out-config <path>  Path to new config.js to overwrite with path mappings
+    -m, --map <package>      add package to mappings
+    -s, --source <file>      main JavaScript source to bundle
+    -p, --package <path>     directory with package.json and config.js
+    -o, --out <file>         write output bundle to file
+    -C, --out-config <file>  write path mappings to new config file
 ```
 
 API
