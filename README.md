@@ -82,7 +82,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 >
 > <a name="api-BuildOptions"></a>
 > ### Interface [`BuildOptions`](#api-BuildOptions)
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/9829aaf/src/cbuild.ts#L10-L19)  
+> <em>Options object for the build function.</em>  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/fe12b9c/src/cbuild.ts#L12-L24)  
 >  
 > Properties:  
 > > **.bundlePath**<sub>?</sub> <sup><code>string</code></sup>  
@@ -97,8 +98,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-build"></a>
 > ### Function [`build`](#api-build)
 > <em>Bundle files from package in basePath according to options.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/9829aaf/src/cbuild.ts#L56-L127)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/9829aaf/src/cbuild.ts#L56-L127)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/fe12b9c/src/cbuild.ts#L91-L200)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/fe12b9c/src/cbuild.ts#L91-L200)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 > > &emsp;&#x25ab; options<sub>?</sub> <sup><code>[BuildOptions](#api-BuildOptions)</code></sup>  
 
