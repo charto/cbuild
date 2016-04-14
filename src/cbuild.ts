@@ -21,24 +21,54 @@ export interface BuildOptions {
 function writeConfig(
 	configPath: string,
 	pathTbl: { [name: string]: string },
-	fixTbl: { [path: string]: string }
+	fixTbl: { [path: string]: string },
+	repoList: string[],
+	shimPath: string
 ) {
-	var output = (
-		'System.config({\n' +
+	var sectionList: string[] = [];
+	var fixList = Object.keys(fixTbl);
+
+	// Output table mapping npm package names to their main entry points.
+
+	sectionList.push(
 		'\tmap: {\n' +
 		Object.keys(pathTbl).map((name: string) =>
 			'\t\t"' + name + '": "' + pathTbl[name] + '"'
 		).join(',\n') + '\n' +
-		'\t},\n' +
-		'\tpackages: {\n' +
-		'\t\t".": {\n' +
-		'\t\t\tmap: {\n' +
-		Object.keys(fixTbl).map((path: string) =>
-			'\t\t\t\t"' + path + '": "' + fixTbl[path] + '"'
+		'\t}'
+	);
+
+	// Output meta command to inject a global process variable to all files
+	// under all encountered node_modules trees.
+
+	sectionList.push(
+		'\tmeta: {\n' +
+		repoList.map((path: string) =>
+			'\t\t"' + path + '/*": { globals: { process: "' + shimPath + '" } }'
 		).join(',\n') + '\n' +
-		'\t\t\t}\n' +
-		'\t\t}\n' +
-		'\t}\n' +
+		'\t}'
+	);
+
+	// Output a list of fixes to file paths, mainly to append index.js
+	// where a directory is being imported.
+
+	if(fixList.length) {
+		sectionList.push(
+			'\tpackages: {\n' +
+			'\t\t".": {\n' +
+			'\t\t\tmap: {\n' +
+			fixList.map((path: string) =>
+				'\t\t\t\t"' + path + '": "' + fixTbl[path] + '"'
+			).join(',\n') + '\n' +
+			'\t\t\t}\n' +
+			'\t\t}\n' +
+			'\t}'
+		);
+	}
+
+	var output = (
+		'System.config({\n' +
+		sectionList.join(',\n') + '\n' +
 		'});\n'
 	);
 
@@ -57,12 +87,14 @@ export function build(basePath: string, options?: BuildOptions) {
 	var builder = new Builder(basePath, 'config.js');
 	var pathTbl: { [name: string]: string } = {};
 	var fixTbl: { [path: string]: string } = {};
+	var repoTbl: { [path: string]: boolean } = {};
 
 	function findPackage(name: string, parentName: string) {
 		return(resolveAsync(name, { filename: parentName }).then((pathName: string) => {
 			if(pathName == name) throw(new Error('Internal module'));
 			pathName = path.relative(basePath, pathName);
 			pathTbl[name] = pathName;
+			repoTbl[pathName.replace(/((\/|^)node_modules)\/.*/i, '$1')] = true;
 
 			return(pathName);
 		}));
@@ -121,7 +153,20 @@ export function build(basePath: string, options?: BuildOptions) {
 		)
 	).then(() => {
 		if(options.outConfigPath) {
-			writeConfig(options.outConfigPath, pathTbl, fixTbl);
+			return(
+				resolveAsync(
+					'cbuild/process.js',
+					{ filename: path.resolve(basePath, 'package.json') }
+				).then((shimPath: string) =>
+					writeConfig(
+						options.outConfigPath,
+						pathTbl,
+						fixTbl,
+						Object.keys(repoTbl),
+						path.relative(basePath, shimPath)
+					)
+				)
+			);
 		}
 	}));
 }
