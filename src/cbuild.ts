@@ -7,13 +7,18 @@ import * as Promise from 'bluebird';
 import * as Builder from 'systemjs-builder';
 import * as resolve from 'browser-resolve';
 
+/** Options object for the build function. */
+
 export interface BuildOptions {
 	/** Bundled file to output. */
 	bundlePath?: string;
+
 	/** Main source file to bundle. */
 	sourcePath?: string;
+
 	/** Output config mapping other package names to their main source files. */
 	outConfigPath?: string;
+
 	/** Map additional packages in output config. */
 	mapPackages?: string[];
 }
@@ -89,11 +94,18 @@ export function build(basePath: string, options?: BuildOptions) {
 	var fixTbl: { [path: string]: string } = {};
 	var repoTbl: { [path: string]: boolean } = {};
 
+	/** Find the main entry point to an npm package (considering package.json
+	  * browser fields of the required and requiring packages). */
+
 	function findPackage(name: string, parentName: string) {
 		return(resolveAsync(name, { filename: parentName }).then((pathName: string) => {
 			if(pathName == name) throw(new Error('Internal module'));
 			pathName = path.relative(basePath, pathName);
+
+			// Store entry point path for this package name.
 			pathTbl[name] = pathName;
+
+			// Store path of top node_modules directory.
 			repoTbl[pathName.replace(/((\/|^)node_modules)\/.*/i, '$1')] = true;
 
 			return(pathName);
@@ -105,6 +117,9 @@ export function build(basePath: string, options?: BuildOptions) {
 	var bundlePath = options.bundlePath;
 	var sourcePath = options.sourcePath;
 
+	// If no entry point for bundling was given, use the browser or main field
+	// in package.json under the base directory.
+
 	if(!sourcePath) {
 		var packageJson = require(path.resolve(basePath, 'package.json'));
 		var browser = packageJson.browser;
@@ -113,7 +128,12 @@ export function build(basePath: string, options?: BuildOptions) {
 		else sourcePath = packageJson.main;
 	}
 
+	/** Old systemjs-builder normalize function which doesn't look for npm packages. */
 	var oldNormalize = builder.loader.normalize;
+
+	// Replace systemjs-builder normalize function adding support for
+	// npm packages and gathering information about paths needed for
+	// generating a SystemJS configuration file.
 
 	builder.loader.normalize = function(name, parentName, parentAddress) {
 		var pathName: string;
@@ -144,15 +164,23 @@ export function build(basePath: string, options?: BuildOptions) {
 
 	var built: Promise<void>;
 
+	// Run systemjs-builder.
+
 	if(bundlePath) built = builder.bundle(sourcePath, bundlePath, {});
-	else built = builder.bundle(sourcePath, bundlePath, {});
+	else built = builder.bundle(sourcePath, {});
 
 	return(built.then(() =>
+
+		// Add mappings to any extra packages listed in command line options.
+
 		Promise.map(options.mapPackages || [], (name: string) =>
 			findPackage(name, path.resolve(basePath, 'package.json'))
 		)
 	).then(() => {
 		if(options.outConfigPath) {
+
+			// Output SystemJS configuration file.
+
 			return(
 				resolveAsync(
 					'cbuild/process.js',
