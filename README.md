@@ -69,6 +69,7 @@ Run `npm run cbuild -- --help` to see the command line options:
 
     -h, --help               output usage information
     -V, --version            output the version number
+    -d, --debug              use development environment
     -m, --map <package>      add package to mappings
     -s, --source <file>      main JavaScript source to bundle
     -p, --package <path>     directory with package.json and config.js
@@ -83,9 +84,11 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-BuildOptions"></a>
 > ### Interface [`BuildOptions`](#api-BuildOptions)
 > <em>Options object for the build function.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/fe12b9c/src/cbuild.ts#L12-L24)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/4e56256/src/cbuild.ts#L12-L27)  
 >  
 > Properties:  
+> > **.debug**<sub>?</sub> <sup><code>boolean</code></sup>  
+> > &emsp;<em>If true, set NODE_ENV to development.</em>  
 > > **.bundlePath**<sub>?</sub> <sup><code>string</code></sup>  
 > > &emsp;<em>Bundled file to output.</em>  
 > > **.sourcePath**<sub>?</sub> <sup><code>string</code></sup>  
@@ -98,8 +101,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-build"></a>
 > ### Function [`build`](#api-build)
 > <em>Bundle files from package in basePath according to options.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/fe12b9c/src/cbuild.ts#L91-L200)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/fe12b9c/src/cbuild.ts#L91-L200)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/4e56256/src/cbuild.ts#L94-L203)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/4e56256/src/cbuild.ts#L94-L203)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 > > &emsp;&#x25ab; options<sub>?</sub> <sup><code>[BuildOptions](#api-BuildOptions)</code></sup>  
 
