@@ -29,11 +29,13 @@ handleBundle(cmd.opts());
 function handleBundle(opts: { [key: string]: any }) {
 	var basePath = path.resolve('.', opts['package']);
 	var sourcePath: string = opts['source'];
+	var debug: boolean = opts['debug'];
 
 	if(sourcePath) sourcePath = path.resolve('.', sourcePath);
+	if(process.env.NODE_ENV == 'development') debug = true;
 
 	build(basePath, {
-		debug: opts['debug'],
+		debug: debug,
 		bundlePath: opts['out'],
 		sourcePath: sourcePath,
 		outConfigPath: opts['outConfig'],
