@@ -10,6 +10,9 @@ import * as resolve from 'browser-resolve';
 /** Options object for the build function. */
 
 export interface BuildOptions {
+	/** If true, set NODE_ENV to development. */
+	debug?: boolean;
+
 	/** Bundled file to output. */
 	bundlePath?: string;
 
@@ -183,7 +186,7 @@ export function build(basePath: string, options?: BuildOptions) {
 
 			return(
 				resolveAsync(
-					'cbuild/process.js',
+					options.debug ? 'cbuild/process-dev.js' : 'cbuild/process.js',
 					{ filename: path.resolve(basePath, 'package.json') }
 				).then((shimPath: string) =>
 					writeConfig(

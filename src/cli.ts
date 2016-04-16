@@ -13,6 +13,7 @@ interface ICommand extends _ICommand {
 
 ((cmd.version(require('../package.json').version) as ICommand)
 	.description('SystemJS node module bundling tool')
+	.option('-d, --debug', 'use development environment')
 	.option('-m, --map <package>', 'add package to mappings', (item: string, list: string[]) => list.concat([item]), [])
 	.option('-s, --source <file>', 'main JavaScript source to bundle')
 	.option('-p, --package <path>', 'directory with package.json and config.js', process.cwd())
@@ -32,6 +33,7 @@ function handleBundle(opts: { [key: string]: any }) {
 	if(sourcePath) sourcePath = path.resolve('.', sourcePath);
 
 	build(basePath, {
+		debug: opts['debug'],
 		bundlePath: opts['out'],
 		sourcePath: sourcePath,
 		outConfigPath: opts['outConfig'],
