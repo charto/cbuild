@@ -69,22 +69,54 @@ Run `npm run cbuild -- --help` to see the command line options:
 
     -h, --help               output usage information
     -V, --version            output the version number
-    -d, --debug              use development environment
+    -d, --debug [flag]       use development environment
     -m, --map <package>      add package to mappings
     -s, --source <file>      main JavaScript source to bundle
     -p, --package <path>     directory with package.json and config.js
     -o, --out <file>         write output bundle to file
     -C, --out-config <file>  write path mappings to new config file
+    -q, --quiet [flag]       suppress terminal output
+    -v, --verbose [flag]     print dependency tree of bundled files
 ```
 
 API
 ===
 Docs generated using [`docts`](https://github.com/charto/docts)
 >
+> <a name="api-Branch"></a>
+> ### Interface [`Branch`](#api-Branch)
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L206-L209)  
+>  
+> Properties:  
+> > **.0**<sub>?</sub> <sup><code>string</code></sup>  
+> > &emsp;<em>File name.</em>  
+>
+> <a name="api-BuildItem"></a>
+> ### Interface [`BuildItem`](#api-BuildItem)
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/58a8f6b/src/typings-custom.d.ts#L8-L25)  
+>  
+> Properties:  
+> > **.name** <sup><code>string</code></sup>  
+> > **.path** <sup><code>string</code></sup>  
+> > **.metadata** <sup><code>{ [key: string]: any; }</code></sup>  
+> > **.deps** <sup><code>string[]</code></sup>  
+> > &emsp;<em>List of imports.</em>  
+> > **.depMap** <sup><code>{ [name: string]: string; }</code></sup>  
+> > &emsp;<em>Table mapping imports to their paths inside the bundle.</em>  
+> > **.source** <sup><code>string</code></sup>  
+> > **.fresh** <sup><code>boolean</code></sup>  
+> > **.timestamp** <sup><code>number</code></sup>  
+> > **.configHash** <sup><code>string</code></sup>  
+> > **.runtimePlugin** <sup><code>boolean</code></sup>  
+> > **.pluginConfig** <sup><code>any</code></sup>  
+> > **.packageConfig** <sup><code>any</code></sup>  
+> > **.isPackageConfig** <sup><code>any</code></sup>  
+> > **.deferredImports** <sup><code>any</code></sup>  
+>
 > <a name="api-BuildOptions"></a>
 > ### Interface [`BuildOptions`](#api-BuildOptions)
 > <em>Options object for the build function.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/4e56256/src/cbuild.ts#L12-L27)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L13-L28)  
 >  
 > Properties:  
 > > **.debug**<sub>?</sub> <sup><code>boolean</code></sup>  
@@ -98,13 +130,39 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > > **.mapPackages**<sub>?</sub> <sup><code>string[]</code></sup>  
 > > &emsp;<em>Map additional packages in output config.</em>  
 >
+> <a name="api-BuildResult"></a>
+> ### Interface [`BuildResult`](#api-BuildResult)
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/58a8f6b/src/typings-custom.d.ts#L27-L39)  
+>  
+> Properties:  
+> > **.source** <sup><code>string</code></sup>  
+> > &emsp;<em>Bundled output file contents.</em>  
+> > **.sourceMap** <sup><code>string</code></sup>  
+> > **.modules** <sup><code>string[]</code></sup>  
+> > &emsp;<em>List if bundled files.</em>  
+> > **.entryPoints** <sup><code>string[]</code></sup>  
+> > &emsp;<em>List of files intended to be imported from the bundle(?).</em>  
+> > **.tree** <sup><code>{ [path: string]: BuildItem; }</code></sup>  
+> > **.assetList** <sup><code>any</code></sup>  
+> > &emsp;<em>Other non-JavaScript files included in the bundle.</em>  
+> > **.bundleName** <sup><code>string</code></sup>  
+>
 > <a name="api-build"></a>
 > ### Function [`build`](#api-build)
 > <em>Bundle files from package in basePath according to options.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/4e56256/src/cbuild.ts#L94-L203)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;void&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/4e56256/src/cbuild.ts#L94-L203)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L95-L204)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;[BuildResult](#api-BuildResult)&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L95-L204)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 > > &emsp;&#x25ab; options<sub>?</sub> <sup><code>[BuildOptions](#api-BuildOptions)</code></sup>  
+>
+> <a name="api-makeTree"></a>
+> ### Function [`makeTree`](#api-makeTree)
+> <em>Extract a dependency tree from the build function result object.</em>  
+> <em>Returns a nameless root item.</em>  
+> <em>Each item is a list of a file name and its child items.</em>  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L215-L241)  
+> > **makeTree( )** <sup>&rArr; <code>[Branch](#api-Branch)</code></sup> [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L215-L241)  
+> > &emsp;&#x25aa; result <sup><code>[BuildResult](#api-BuildResult)</code></sup>  
 
 License
 =======
