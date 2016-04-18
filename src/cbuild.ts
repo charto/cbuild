@@ -203,6 +203,8 @@ export function build(basePath: string, options?: BuildOptions) {
 	}).then(() => built.value()));
 }
 
+/** Dependency tree branch, used for makeTree() output. */
+
 export interface Branch extends Array<string | Branch> {
 	/** File name. */
 	0?: string
@@ -210,7 +212,8 @@ export interface Branch extends Array<string | Branch> {
 
 /** Extract a dependency tree from the build function result object.
   * Returns a nameless root item.
-  * Each item is a list of a file name and its child items. */
+  * Each item is a list of a file name and its child items.
+  * Uses Breadth-First Search to print shortest import chain to each file. */
 
 export function makeTree(result: Builder.BuildResult) {
 	var output: Branch = [''];

@@ -5,6 +5,8 @@ declare module 'systemjs-builder' {
 	import * as Promise from 'bluebird';
 
 	module Builder {
+		/** systemjs-builder diagnostics for a single input file. */
+
 		interface BuildItem {
 			name: string;
 			path: string;
@@ -24,11 +26,13 @@ declare module 'systemjs-builder' {
 			deferredImports: any;
 		}
 
+		/** systemjs-builder diagnostics for the entire bundle. */
+
 		interface BuildResult {
 			/** Bundled output file contents. */
 			source: string;
 			sourceMap: string;
-			/** List if bundled files. */
+			/** List of bundled files. */
 			modules: string[];
 			/** List of files intended to be imported from the bundle(?). */
 			entryPoints: string[];

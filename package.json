@@ -1,6 +1,6 @@
 {
   "name": "cbuild",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Use SystemJS with npm instead of jspm",
   "main": "dist/cbuild.js",
   "typings": "dist/cbuild.d.ts",
@@ -28,11 +28,11 @@
     "bluebird": "^3.3.5",
     "browser-resolve": "~1.11.1",
     "commander": "~2.9.0",
-    "systemjs-builder": "~0.15.15"
+    "systemjs-builder": "~0.15.16"
   },
   "devDependencies": {
     "docts": "~0.0.4",
     "typescript": "^1.8.10",
-    "typings": "~0.7.12"
+    "typings": "~0.8.1"
   }
 }
