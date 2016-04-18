@@ -202,3 +202,40 @@ export function build(basePath: string, options?: BuildOptions) {
 		}
 	}).then(() => built.value()));
 }
+
+export interface Branch extends Array<string | Branch> {
+	/** File name. */
+	0?: string
+}
+
+/** Extract a dependency tree from the build function result object.
+  * Returns a nameless root item.
+  * Each item is a list of a file name and its child items. */
+
+export function makeTree(result: Builder.BuildResult) {
+	var output: Branch = [''];
+	var queue: string[] = [];
+	var found: { [name: string]: Branch } = {};
+
+	function report(name: string, branch: Branch) {
+		if(!found[name]) {
+			var leaf: Branch = [name];
+			found[name] = leaf;
+
+			branch.push(leaf);
+			queue.push(name);
+		}
+	}
+
+	for(var name of result.entryPoints) report(name, output);
+
+	while(queue.length) {
+		var name = queue.shift();
+		var branch = found[name];
+		var item = result.tree[name];
+
+		for(var dep of item.deps) report(item.depMap[dep], branch);
+	}
+
+	return(output);
+}

@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as cmd from 'commander';
 
-import {build, BuildResult} from './cbuild';
+import {build, BuildResult, makeTree, Branch} from './cbuild';
 
 type _ICommand = typeof cmd;
 interface ICommand extends _ICommand {
@@ -20,6 +20,31 @@ function parseBool(flag: string) {
 	return(!flag || !falseTbl[flag.toLowerCase()]);
 }
 
+/** Wrap output in ANSI escape sequences to show it in given color. */
+
+function paint(text: string, color: number, bold?: boolean) {
+	if(!process.stdout || !(process.stdout as any).isTTY) return(text);
+
+	return('\u001b[' + (bold ? '1;' : '') + color + 'm' + text + '\u001b[' + (bold ? '22;' : '') + '39m');
+}
+
+/** Print dependency tree of bundled files. */
+
+function printTree(root: Branch, indent = '') {
+	var output: string[] = [];
+	var index = 0;
+
+	if(root[0]) output.push(indent + paint(root[0], 36));
+
+	for(var child of root) {
+		if(index++ > 0) {
+			output.push.apply(output, printTree(child as Branch, indent + '  '));
+		}
+	}
+
+	return(output);
+}
+
 ((cmd.version(require('../package.json').version) as ICommand)
 	.description('SystemJS node module bundling tool')
 	.option('-d, --debug [flag]', 'use development environment', parseBool)
@@ -29,7 +54,7 @@ function parseBool(flag: string) {
 	.option('-o, --out <file>', 'write output bundle to file')
 	.option('-C, --out-config <file>', 'write path mappings to new config file')
 	.option('-q, --quiet [flag]', 'suppress terminal output', parseBool)
-	.option('-v, --verbose [flag]', 'print names of bundled files', parseBool)
+	.option('-v, --verbose [flag]', 'print dependency tree of bundled files', parseBool)
 	.parse(process.argv)
 );
 
@@ -64,15 +89,14 @@ function handleBundle(opts: { [key: string]: any }) {
 		mapPackages: opts['map']
 	}).then((result: BuildResult) => {
 		if(!quiet) {
-			console.log('Build complete!');
 			if(verbose) {
-				console.log('Files:');
-				console.log(result.modules.join('\n'));
+				console.log('\n' + printTree(makeTree(result)).join('\n'));
 			}
+			console.log('\nBuild complete!');
 		}
 	}).catch((err) => {
 		if(!quiet) {
-			console.log('Build error:');
+			console.log('\nBuild error:');
 			console.log(err);
 		}
 
