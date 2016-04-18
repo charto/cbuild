@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as Promise from 'bluebird';
 import * as Builder from 'systemjs-builder';
 import * as resolve from 'browser-resolve';
+export {BuildResult, BuildItem} from 'systemjs-builder';
 
 /** Options object for the build function. */
 
@@ -165,7 +166,7 @@ export function build(basePath: string, options?: BuildOptions) {
 		}));
 	}
 
-	var built: Promise<void>;
+	var built: Promise<Builder.BuildResult>;
 
 	// Run systemjs-builder.
 
@@ -199,5 +200,5 @@ export function build(basePath: string, options?: BuildOptions) {
 				)
 			);
 		}
-	}));
+	}).then(() => built.value()));
 }
