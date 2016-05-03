@@ -14,6 +14,9 @@ export interface BuildOptions {
 	/** If true, set NODE_ENV to development. */
 	debug?: boolean;
 
+	/** If true, create static (sfx) bundle. */
+	sfx?: boolean;
+
 	/** Bundled file to output. */
 	bundlePath?: string;
 
@@ -132,7 +135,8 @@ export function build(basePath: string, options?: BuildOptions) {
 		else sourcePath = packageJson.main;
 	}
 
-	/** Old systemjs-builder normalize function which doesn't look for npm packages. */
+	/** Old systemjs-builder normalize function which doesn't look for npm packages.
+	  * See https://github.com/ModuleLoader/es6-module-loader/wiki/Extending-the-ES6-Loader */
 	var oldNormalize = builder.loader.normalize;
 
 	// Replace systemjs-builder normalize function adding support for
@@ -170,8 +174,13 @@ export function build(basePath: string, options?: BuildOptions) {
 
 	// Run systemjs-builder.
 
-	if(bundlePath) built = builder.bundle(sourcePath, bundlePath, {});
-	else built = builder.bundle(sourcePath, {});
+	if(options.sfx) {
+		if(bundlePath) built = builder.buildStatic(sourcePath, bundlePath, {});
+		else built = builder.buildStatic(sourcePath, {});
+	} else {
+		if(bundlePath) built = builder.bundle(sourcePath, bundlePath, {});
+		else built = builder.bundle(sourcePath, {});
+	}
 
 	return(built.then(() =>
 
@@ -181,6 +190,11 @@ export function build(basePath: string, options?: BuildOptions) {
 			findPackage(name, path.resolve(basePath, 'package.json'))
 		)
 	).then(() => {
+
+		// Restore original systemjs-builder normalize function.
+
+		builder.loader.normalize = oldNormalize;
+
 		if(options.outConfigPath) {
 
 			// Output SystemJS configuration file.

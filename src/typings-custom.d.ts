@@ -51,8 +51,12 @@ declare module 'systemjs-builder' {
 		constructor(basePath: string, configPath: string);
 
 		loadConfig(configPath: string): Promise<void>;
+
 		bundle(sourcePath: string, targetPath: string, options: {}): Promise<Builder.BuildResult>;
 		bundle(sourcePath: string, options: {}): Promise<Builder.BuildResult>;
+
+		buildStatic(sourcePath: string, targetPath: string, options: {}): Promise<Builder.BuildResult>;
+		buildStatic(sourcePath: string, options: {}): Promise<Builder.BuildResult>;
 
 		loader: Loader;
 	}

@@ -55,6 +55,7 @@ function printTree(root: Branch, indent = '') {
 	.option('-C, --out-config <file>', 'write path mappings to new config file')
 	.option('-q, --quiet [flag]', 'suppress terminal output', parseBool)
 	.option('-v, --verbose [flag]', 'print dependency tree of bundled files', parseBool)
+	.option('-x, --static [flag]', 'create static (sfx) bundle', parseBool)
 	.parse(process.argv)
 );
 
@@ -69,6 +70,7 @@ function handleBundle(opts: { [key: string]: any }) {
 	var debug: boolean = opts['debug'];
 	var quiet: boolean = opts['quiet'];
 	var verbose: boolean = opts['verbose'];
+	var sfx: boolean = opts['static'];
 
 	if(sourcePath) sourcePath = path.resolve('.', sourcePath);
 	if(env == 'development') debug = true;
@@ -83,6 +85,7 @@ function handleBundle(opts: { [key: string]: any }) {
 
 	build(basePath, {
 		debug: debug,
+		sfx: sfx,
 		bundlePath: opts['out'],
 		sourcePath: sourcePath,
 		outConfigPath: opts['outConfig'],
