@@ -77,6 +77,7 @@ Run `npm run cbuild -- --help` to see the command line options:
     -C, --out-config <file>  write path mappings to new config file
     -q, --quiet [flag]       suppress terminal output
     -v, --verbose [flag]     print dependency tree of bundled files
+    -x, --static [flag]      create static (sfx) bundle
 ```
 
 API
@@ -85,7 +86,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 >
 > <a name="api-Branch"></a>
 > ### Interface [`Branch`](#api-Branch)
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L206-L209)  
+> <em>Dependency tree branch, used for makeTree() output.</em>  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L222-L225)  
 >  
 > Properties:  
 > > **.0**<sub>?</sub> <sup><code>string</code></sup>  
@@ -93,7 +95,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 >
 > <a name="api-BuildItem"></a>
 > ### Interface [`BuildItem`](#api-BuildItem)
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/58a8f6b/src/typings-custom.d.ts#L8-L25)  
+> <em>systemjs-builder diagnostics for a single input file.</em>  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/typings-custom.d.ts#L10-L27)  
 >  
 > Properties:  
 > > **.name** <sup><code>string</code></sup>  
@@ -116,11 +119,13 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-BuildOptions"></a>
 > ### Interface [`BuildOptions`](#api-BuildOptions)
 > <em>Options object for the build function.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L13-L28)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L13-L31)  
 >  
 > Properties:  
 > > **.debug**<sub>?</sub> <sup><code>boolean</code></sup>  
 > > &emsp;<em>If true, set NODE_ENV to development.</em>  
+> > **.sfx**<sub>?</sub> <sup><code>boolean</code></sup>  
+> > &emsp;<em>If true, create static (sfx) bundle.</em>  
 > > **.bundlePath**<sub>?</sub> <sup><code>string</code></sup>  
 > > &emsp;<em>Bundled file to output.</em>  
 > > **.sourcePath**<sub>?</sub> <sup><code>string</code></sup>  
@@ -132,14 +137,15 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 >
 > <a name="api-BuildResult"></a>
 > ### Interface [`BuildResult`](#api-BuildResult)
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/58a8f6b/src/typings-custom.d.ts#L27-L39)  
+> <em>systemjs-builder diagnostics for the entire bundle.</em>  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/typings-custom.d.ts#L31-L43)  
 >  
 > Properties:  
 > > **.source** <sup><code>string</code></sup>  
 > > &emsp;<em>Bundled output file contents.</em>  
 > > **.sourceMap** <sup><code>string</code></sup>  
 > > **.modules** <sup><code>string[]</code></sup>  
-> > &emsp;<em>List if bundled files.</em>  
+> > &emsp;<em>List of bundled files.</em>  
 > > **.entryPoints** <sup><code>string[]</code></sup>  
 > > &emsp;<em>List of files intended to be imported from the bundle(?).</em>  
 > > **.tree** <sup><code>{ [path: string]: BuildItem; }</code></sup>  
@@ -150,8 +156,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-build"></a>
 > ### Function [`build`](#api-build)
 > <em>Bundle files from package in basePath according to options.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L95-L204)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;[BuildResult](#api-BuildResult)&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L95-L204)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L98-L218)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;[BuildResult](#api-BuildResult)&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L98-L218)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 > > &emsp;&#x25ab; options<sub>?</sub> <sup><code>[BuildOptions](#api-BuildOptions)</code></sup>  
 >
@@ -160,8 +166,9 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <em>Extract a dependency tree from the build function result object.</em>  
 > <em>Returns a nameless root item.</em>  
 > <em>Each item is a list of a file name and its child items.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L215-L241)  
-> > **makeTree( )** <sup>&rArr; <code>[Branch](#api-Branch)</code></sup> [`<>`](http://github.com/charto/cbuild/blob/df548cf/src/cbuild.ts#L215-L241)  
+> <em>Uses Breadth-First Search to print shortest import chain to each file.</em>  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L232-L258)  
+> > **makeTree( )** <sup>&rArr; <code>[Branch](#api-Branch)</code></sup> [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L232-L258)  
 > > &emsp;&#x25aa; result <sup><code>[BuildResult](#api-BuildResult)</code></sup>  
 
 License
