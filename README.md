@@ -87,7 +87,7 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-Branch"></a>
 > ### Interface [`Branch`](#api-Branch)
 > <em>Dependency tree branch, used for makeTree() output.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L222-L225)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/77b2a6f/src/cbuild.ts#L222-L225)  
 >  
 > Properties:  
 > > **.0**<sub>?</sub> <sup><code>string</code></sup>  
@@ -119,7 +119,7 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-BuildOptions"></a>
 > ### Interface [`BuildOptions`](#api-BuildOptions)
 > <em>Options object for the build function.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L13-L31)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/77b2a6f/src/cbuild.ts#L13-L31)  
 >  
 > Properties:  
 > > **.debug**<sub>?</sub> <sup><code>boolean</code></sup>  
@@ -156,8 +156,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <a name="api-build"></a>
 > ### Function [`build`](#api-build)
 > <em>Bundle files from package in basePath according to options.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L98-L218)  
-> > **build( )** <sup>&rArr; <code>Bluebird&lt;[BuildResult](#api-BuildResult)&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L98-L218)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/77b2a6f/src/cbuild.ts#L98-L218)  
+> > **build( )** <sup>&rArr; <code>Bluebird&lt;[BuildResult](#api-BuildResult)&gt;</code></sup> [`<>`](http://github.com/charto/cbuild/blob/77b2a6f/src/cbuild.ts#L98-L218)  
 > > &emsp;&#x25aa; basePath <sup><code>string</code></sup>  
 > > &emsp;&#x25ab; options<sub>?</sub> <sup><code>[BuildOptions](#api-BuildOptions)</code></sup>  
 >
@@ -167,8 +167,8 @@ Docs generated using [`docts`](https://github.com/charto/docts)
 > <em>Returns a nameless root item.</em>  
 > <em>Each item is a list of a file name and its child items.</em>  
 > <em>Uses Breadth-First Search to print shortest import chain to each file.</em>  
-> Source code: [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L232-L258)  
-> > **makeTree( )** <sup>&rArr; <code>[Branch](#api-Branch)</code></sup> [`<>`](http://github.com/charto/cbuild/blob/50a7bec/src/cbuild.ts#L232-L258)  
+> Source code: [`<>`](http://github.com/charto/cbuild/blob/77b2a6f/src/cbuild.ts#L232-L279)  
+> > **makeTree( )** <sup>&rArr; <code>[Branch](#api-Branch)</code></sup> [`<>`](http://github.com/charto/cbuild/blob/77b2a6f/src/cbuild.ts#L232-L279)  
 > > &emsp;&#x25aa; result <sup><code>[BuildResult](#api-BuildResult)</code></sup>  
 
 License
