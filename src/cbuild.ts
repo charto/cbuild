@@ -244,7 +244,28 @@ export function makeTree(result: Builder.BuildResult) {
 		}
 	}
 
-	for(var name of result.entryPoints) report(name, output);
+	var entryPoints = result.entryPoints;
+
+	if(!entryPoints) {
+		// Bundling reported no entry points (maybe it's an sfx bundle).
+		// Create a table of all modules that were imported somehow.
+
+		var importedTbl: { [name: string]: boolean } = {};
+
+		for(var name of Object.keys(result.tree)) {
+			var item = result.tree[name];
+
+			for(var dep of item.deps) {
+				importedTbl[item.depMap[dep]] = true;
+			}
+		}
+
+		// Assume modules not imported by others are entry points.
+
+		entryPoints = Object.keys(result.tree).filter((name: string) => !importedTbl[name]);
+	}
+
+	for(var name of entryPoints) report(name, output);
 
 	while(queue.length) {
 		var name = queue.shift();

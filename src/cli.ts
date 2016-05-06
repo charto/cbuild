@@ -100,7 +100,7 @@ function handleBundle(opts: { [key: string]: any }) {
 	}).catch((err) => {
 		if(!quiet) {
 			console.log('\nBuild error:');
-			console.log(err);
+			console.log(err.stack);
 		}
 
 		process.exit(1);
