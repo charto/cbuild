@@ -87,8 +87,27 @@ function writeConfig(
 	return(fs.writeFileSync(configPath, output, { encoding: 'utf-8' }));
 }
 
-function url2path(pathName: string) {
-	return(pathName.replace(/^file:\/\//, ''));
+function url2path(urlPath: string) {
+	var nativePath = urlPath.replace(/^file:\/\//, '')
+
+	if(path.sep != '/') {
+		if(nativePath.match(/^\/[0-9A-Za-z]+:\//)) nativePath = nativePath.substr(1);
+		nativePath = nativePath.replace(/\//g, path.sep);
+	}
+
+	return(nativePath);
+}
+
+function path2url(nativePath: string) {
+	var urlPath = nativePath;
+
+	if(path.sep != '/') {
+		var re = new RegExp(path.sep.replace(/\\/g, '\\\\'), 'g');
+		urlPath = urlPath.replace(re, '/');
+		if(urlPath.match(/^[0-9A-Za-z]+:\//)) urlPath = '/' + urlPath;
+	}
+
+	return(urlPath.replace(/^\//, 'file:///'));
 }
 
 var resolveAsync = Promise.promisify(resolve);
@@ -96,7 +115,7 @@ var resolveAsync = Promise.promisify(resolve);
 /** Bundle files from package in basePath according to options. */
 
 export function build(basePath: string, options?: BuildOptions) {
-	var builder = new Builder(basePath, 'config.js');
+	var builder = new Builder(path2url(basePath), 'config.js');
 	var pathTbl: { [name: string]: string } = {};
 	var fixTbl: { [path: string]: string } = {};
 	var repoTbl: { [path: string]: boolean } = {};
@@ -105,9 +124,9 @@ export function build(basePath: string, options?: BuildOptions) {
 	  * browser fields of the required and requiring packages). */
 
 	function findPackage(name: string, parentName: string) {
-		return(resolveAsync(name, { filename: parentName }).then((pathName: string) => {
+		return(resolveAsync(name, { filename: url2path(parentName) }).then((pathName: string) => {
 			if(pathName == name) throw(new Error('Internal module'));
-			pathName = path.relative(basePath, pathName);
+			pathName = path2url(path.relative(basePath, pathName));
 
 			// Store entry point path for this package name.
 			pathTbl[name] = pathName;
@@ -131,8 +150,10 @@ export function build(basePath: string, options?: BuildOptions) {
 		var packageJson = require(path.resolve(basePath, 'package.json'));
 		var browser = packageJson.browser;
 
-		if(typeof(browser) == 'string') sourcePath = browser;
-		else sourcePath = packageJson.main;
+		sourcePath = path.resolve(
+			basePath,
+			typeof(browser) == 'string' ? browser : packageJson.main
+		);
 	}
 
 	/** Old systemjs-builder normalize function which doesn't look for npm packages.
@@ -159,10 +180,11 @@ export function build(basePath: string, options?: BuildOptions) {
 				Promise.promisify(fs.stat)(
 					url2path(indexName)
 				).then((stats: fs.Stats) => {
+					// TODO: test on Windows
 					fixTbl['./' + path.relative(basePath, url2path(pathName))] = './' + path.relative(basePath, url2path(indexName));
 					return(indexName);
 				}).catch((err: NodeJS.ErrnoException) =>
-					findPackage(name, url2path(parentName))
+					findPackage(name, parentName)
 				).catch((err: any) =>
 					pathName
 				)
@@ -171,15 +193,16 @@ export function build(basePath: string, options?: BuildOptions) {
 	}
 
 	var built: Promise<Builder.BuildResult>;
+	var sourceUrl = path2url(sourcePath);
 
 	// Run systemjs-builder.
 
 	if(options.sfx) {
-		if(bundlePath) built = builder.buildStatic(sourcePath, bundlePath, {});
-		else built = builder.buildStatic(sourcePath, {});
+		if(bundlePath) built = builder.buildStatic(sourceUrl, bundlePath, {});
+		else built = builder.buildStatic(sourceUrl, {});
 	} else {
-		if(bundlePath) built = builder.bundle(sourcePath, bundlePath, {});
-		else built = builder.bundle(sourcePath, {});
+		if(bundlePath) built = builder.bundle(sourceUrl, bundlePath, {});
+		else built = builder.bundle(sourceUrl, {});
 	}
 
 	return(built.then(() =>
@@ -201,6 +224,7 @@ export function build(basePath: string, options?: BuildOptions) {
 
 			return(
 				resolveAsync(
+					// TODO: test on Windows
 					options.debug ? 'cbuild/process-dev.js' : 'cbuild/process.js',
 					{ filename: path.resolve(basePath, 'package.json') }
 				).then((shimPath: string) =>

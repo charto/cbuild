@@ -1,18 +1,18 @@
 {
   "name": "cbuild",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Use SystemJS with npm instead of jspm",
   "main": "dist/cbuild.js",
   "typings": "dist/cbuild.d.ts",
   "bin": {
-    "cbuild": "cbuild-cli.js"
+    "cbuild": "cbuild"
   },
   "scripts": {
     "tsc": "tsc",
     "docts": "docts",
     "typings": "typings",
     "prepublish": "typings install && tsc",
-    "test": "npm link cbuild && cbuild --help"
+    "test": "node cbuild --help"
   },
   "author": "Juha Järvi",
   "license": "MIT",
