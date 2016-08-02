@@ -26,12 +26,15 @@ export interface BuildOptions {
 	/** Output config mapping other package names to their main source files. */
 	outConfigPath?: string;
 
+	/** Merge other config files into output config. */
+	includeConfigList?: string[];
+
 	/** Map additional packages in output config. */
 	mapPackages?: string[];
 }
 
 function writeConfig(
-	configPath: string,
+	options: BuildOptions,
 	pathTbl: { [name: string]: string },
 	fixTbl: { [path: string]: string },
 	repoList: string[],
@@ -78,13 +81,15 @@ function writeConfig(
 		);
 	}
 
-	var output = (
+	var output = options.includeConfigList.map((path: string) =>
+		fs.readFileSync(path, { encoding: 'utf-8' })
+	).join('\n') + (
 		'System.config({\n' +
 		sectionList.join(',\n') + '\n' +
 		'});\n'
 	);
 
-	return(fs.writeFileSync(configPath, output, { encoding: 'utf-8' }));
+	return(fs.writeFileSync(options.outConfigPath, output, { encoding: 'utf-8' }));
 }
 
 function url2path(urlPath: string) {
@@ -229,7 +234,7 @@ export function build(basePath: string, options?: BuildOptions) {
 					{ filename: path.resolve(basePath, 'package.json') }
 				).then((shimPath: string) =>
 					writeConfig(
-						options.outConfigPath,
+						options,
 						pathTbl,
 						fixTbl,
 						Object.keys(repoTbl),

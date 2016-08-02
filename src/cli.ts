@@ -53,6 +53,7 @@ function printTree(root: Branch, indent = '') {
 	.option('-p, --package <path>', 'directory with package.json and config.js', process.cwd())
 	.option('-o, --out <file>', 'write output bundle to file')
 	.option('-C, --out-config <file>', 'write path mappings to new config file')
+	.option('-I, --include-config <file>', 'merge another file into new config file', (item: string, list: string[]) => list.concat([item]), [])
 	.option('-q, --quiet [flag]', 'suppress terminal output', parseBool)
 	.option('-v, --verbose [flag]', 'print dependency tree of bundled files', parseBool)
 	.option('-x, --static [flag]', 'create static (sfx) bundle', parseBool)
@@ -89,6 +90,7 @@ function handleBundle(opts: { [key: string]: any }) {
 		bundlePath: opts['out'],
 		sourcePath: sourcePath,
 		outConfigPath: opts['outConfig'],
+		includeConfigList: opts['includeConfig'],
 		mapPackages: opts['map']
 	}).then((result: BuildResult) => {
 		if(!quiet) {
