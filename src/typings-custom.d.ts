@@ -45,6 +45,8 @@ declare module 'systemjs-builder' {
 
 	class Loader {
 		normalize(name: string, parentName: string, parentAddress: string): Promise<string>;
+
+		map: { [name: string]: string };
 	}
 
 	class Builder {

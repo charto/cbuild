@@ -144,8 +144,20 @@ export function build(basePath: string, options?: BuildOptions) {
 		}));
 	}
 
-	function newNormalize(name: string, parentName: string, pathName: string) {
+	function newNormalize(
+		name: string,
+		parentName: string,
+		parentAddress:string,
+		pathName: string
+	) {
 		const indexName = pathName.replace(/.js$/, '/index.js');
+
+		if(builder.loader.map) {
+			const other = builder.loader.map[name];
+			if(other && other != name) {
+				return(builder.loader.normalize(other, parentName, parentAddress));
+			}
+		}
 
 		return(
 			Promise.promisify(fs.stat)(
@@ -206,7 +218,7 @@ export function build(basePath: string, options?: BuildOptions) {
 				return(Promise.promisify(fs.stat)(url2path(pathName)));
 			}).then((stats: fs.Stats) =>
 				pathName
-			).catch((err: NodeJS.ErrnoException) => newNormalize(name, parentName, pathName))
+			).catch((err: NodeJS.ErrnoException) => newNormalize(name, parentName, parentAddress, pathName))
 		);
 	};
 
