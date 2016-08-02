@@ -1,11 +1,10 @@
 {
   "name": "cbuild",
-  "version": false,
   "dependencies": {
-    "bluebird": "registry:npm/bluebird#3.3.4+20160427051630"
+    "bluebird": "registry:npm/bluebird#3.3.4+20160802085254"
   },
-  "ambientDependencies": {
+  "globalDependencies": {
     "commander": "registry:dt/commander#2.3.0+20160317120654",
-    "node": "registry:dt/node#4.0.0+20160501135006"
+    "node": "registry:dt/node#6.0.0+20160801161248"
   }
 }

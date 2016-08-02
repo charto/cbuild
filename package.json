@@ -11,7 +11,7 @@
     "tsc": "tsc",
     "docts": "docts",
     "typings": "typings",
-    "prepublish": "typings install && tsc",
+    "prepublish": "typings install && tsc -p src",
     "test": "node cbuild --help"
   },
   "author": "Juha Järvi",
@@ -25,14 +25,14 @@
   },
   "homepage": "https://github.com/charto/cbuild#readme",
   "dependencies": {
-    "bluebird": "^3.3.5",
-    "browser-resolve": "~1.11.1",
+    "bluebird": "^3.4.1",
+    "browser-resolve": "~1.11.2",
     "commander": "~2.9.0",
-    "systemjs-builder": "~0.15.16"
+    "systemjs-builder": "~0.15.26"
   },
   "devDependencies": {
-    "docts": "~0.0.4",
+    "docts": "~0.1.0",
     "typescript": "^1.8.10",
-    "typings": "~0.8.1"
+    "typings": "~1.3.2"
   }
 }

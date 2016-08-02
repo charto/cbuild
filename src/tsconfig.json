@@ -5,15 +5,15 @@
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
-		"outDir": "dist",
+		"outDir": "../dist",
 		"removeComments": false,
 		"target": "es5"
 	},
 	"files": [
-		"typings/main.d.ts",
+		"../typings/index.d.ts",
 
-		"src/typings-custom.d.ts",
-		"src/cbuild.ts",
-		"src/cli.ts"
+		"typings-custom.d.ts",
+		"cbuild.ts",
+		"cli.ts"
 	]
 }
