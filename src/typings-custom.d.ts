@@ -4,7 +4,7 @@
 declare module 'systemjs-builder' {
 	import * as Promise from 'bluebird';
 
-	module Builder {
+	namespace Builder {
 		/** systemjs-builder diagnostics for a single input file. */
 
 		interface BuildItem {
@@ -52,11 +52,27 @@ declare module 'systemjs-builder' {
 
 		loadConfig(configPath: string): Promise<void>;
 
-		bundle(sourcePath: string, targetPath: string, options: {}): Promise<Builder.BuildResult>;
-		bundle(sourcePath: string, options: {}): Promise<Builder.BuildResult>;
+		bundle(
+			sourcePath: string,
+			targetPath: string,
+			options: {}
+		): Promise<Builder.BuildResult>;
 
-		buildStatic(sourcePath: string, targetPath: string, options: {}): Promise<Builder.BuildResult>;
-		buildStatic(sourcePath: string, options: {}): Promise<Builder.BuildResult>;
+		bundle(
+			sourcePath: string,
+			options: {}
+		): Promise<Builder.BuildResult>;
+
+		buildStatic(
+			sourcePath: string,
+			targetPath: string,
+			options: {}
+		): Promise<Builder.BuildResult>;
+
+		buildStatic(
+			sourcePath: string,
+			options: {}
+		): Promise<Builder.BuildResult>;
 
 		loader: Loader;
 	}
@@ -65,7 +81,7 @@ declare module 'systemjs-builder' {
 }
 
 declare module 'browser-resolve' {
-	var resolve: (name: string, options: {
+	const resolve: (name: string, options: {
 		filename: string
 	}) => string;
 

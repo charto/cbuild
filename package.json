@@ -11,7 +11,9 @@
     "tsc": "tsc",
     "docts": "docts",
     "typings": "typings",
-    "prepublish": "typings install && tsc -p src",
+
+    "lint": "tslint -c src/tslint.json src/*.ts",
+    "prepublish": "npm run lint && typings install && tsc -p src",
     "test": "node cbuild --help"
   },
   "author": "Juha Järvi",
@@ -32,6 +34,7 @@
   },
   "devDependencies": {
     "docts": "~0.1.0",
+    "tslint": "^3.14.0",
     "typescript": "^1.8.10",
     "typings": "~1.3.2"
   }

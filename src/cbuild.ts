@@ -40,8 +40,8 @@ function writeConfig(
 	repoList: string[],
 	shimPath: string
 ) {
-	var sectionList: string[] = [];
-	var fixList = Object.keys(fixTbl);
+	const sectionList: string[] = [];
+	const fixList = Object.keys(fixTbl);
 
 	// Output table mapping npm package names to their main entry points.
 
@@ -81,7 +81,7 @@ function writeConfig(
 		);
 	}
 
-	var output = options.includeConfigList.map((path: string) =>
+	const output = options.includeConfigList.map((path: string) =>
 		fs.readFileSync(path, { encoding: 'utf-8' })
 	).join('\n') + (
 		'System.config({\n' +
@@ -93,7 +93,7 @@ function writeConfig(
 }
 
 function url2path(urlPath: string) {
-	var nativePath = urlPath.replace(/^file:\/\//, '')
+	let nativePath = urlPath.replace(/^file:\/\//, '');
 
 	if(path.sep != '/') {
 		if(nativePath.match(/^\/[0-9A-Za-z]+:\//)) nativePath = nativePath.substr(1);
@@ -104,10 +104,11 @@ function url2path(urlPath: string) {
 }
 
 function path2url(nativePath: string) {
-	var urlPath = nativePath;
+	let urlPath = nativePath;
 
 	if(path.sep != '/') {
-		var re = new RegExp(path.sep.replace(/\\/g, '\\\\'), 'g');
+		const re = new RegExp(path.sep.replace(/\\/g, '\\\\'), 'g');
+
 		urlPath = urlPath.replace(re, '/');
 		if(urlPath.match(/^[0-9A-Za-z]+:\//)) urlPath = '/' + urlPath;
 	}
@@ -115,15 +116,15 @@ function path2url(nativePath: string) {
 	return(urlPath.replace(/^\//, 'file:///'));
 }
 
-var resolveAsync = Promise.promisify(resolve);
+const resolveAsync = Promise.promisify(resolve);
 
 /** Bundle files from package in basePath according to options. */
 
 export function build(basePath: string, options?: BuildOptions) {
-	var builder = new Builder(path2url(basePath), 'config.js');
-	var pathTbl: { [name: string]: string } = {};
-	var fixTbl: { [path: string]: string } = {};
-	var repoTbl: { [path: string]: boolean } = {};
+	const builder = new Builder(path2url(basePath), 'config.js');
+	const pathTbl: { [name: string]: string } = {};
+	const fixTbl: { [path: string]: string } = {};
+	const repoTbl: { [path: string]: boolean } = {};
 
 	/** Find the main entry point to an npm package (considering package.json
 	  * browser fields of the required and requiring packages). */
@@ -143,17 +144,39 @@ export function build(basePath: string, options?: BuildOptions) {
 		}));
 	}
 
+	function newNormalize(name: string, parentName: string, pathName: string) {
+		const indexName = pathName.replace(/.js$/, '/index.js');
+
+		return(
+			Promise.promisify(fs.stat)(
+				url2path(indexName)
+			).then((stats: fs.Stats) => {
+				const oldPath = './' + path.relative(basePath, url2path(pathName));
+				const newPath = './' + path.relative(basePath, url2path(indexName));
+
+				// TODO: test on Windows
+				fixTbl[oldPath] = newPath;
+
+				return(indexName);
+			}).catch((err: NodeJS.ErrnoException) =>
+				findPackage(name, parentName)
+			).catch((err: any) =>
+				pathName
+			)
+		);
+	}
+
 	options = options || {};
 
-	var bundlePath = options.bundlePath;
-	var sourcePath = options.sourcePath;
+	const bundlePath = options.bundlePath;
+	let sourcePath = options.sourcePath;
 
 	// If no entry point for bundling was given, use the browser or main field
 	// in package.json under the base directory.
 
 	if(!sourcePath) {
-		var packageJson = require(path.resolve(basePath, 'package.json'));
-		var browser = packageJson.browser;
+		const packageJson = require(path.resolve(basePath, 'package.json'));
+		const browser = packageJson.browser;
 
 		sourcePath = path.resolve(
 			basePath,
@@ -163,52 +186,44 @@ export function build(basePath: string, options?: BuildOptions) {
 
 	/** Old systemjs-builder normalize function which doesn't look for npm packages.
 	  * See https://github.com/ModuleLoader/es6-module-loader/wiki/Extending-the-ES6-Loader */
-	var oldNormalize = builder.loader.normalize;
+	const oldNormalize = builder.loader.normalize;
 
 	// Replace systemjs-builder normalize function adding support for
 	// npm packages and gathering information about paths needed for
 	// generating a SystemJS configuration file.
 
-	builder.loader.normalize = function(name, parentName, parentAddress) {
-		var pathName: string;
-		var indexName: string;
+	builder.loader.normalize = function(
+		name: string,
+		parentName: string,
+		parentAddress: string
+	) {
+		let pathName: string;
 
-		return(oldNormalize.call(this, name, parentName, parentAddress).then((result: string) => {
-			pathName = result;
+		return(
+			// tslint:disable-next-line:no-invalid-this
+			oldNormalize.call(this, name, parentName, parentAddress).then((result: string) => {
+				pathName = result;
+				return(Promise.promisify(fs.stat)(url2path(pathName)));
+			}).then((stats: fs.Stats) =>
+				pathName
+			).catch((err: NodeJS.ErrnoException) => newNormalize(name, parentName, pathName))
+		);
+	};
 
-			return(Promise.promisify(fs.stat)(url2path(pathName)));
-		}).then((stats: fs.Stats) =>
-			pathName
-		).catch((err: NodeJS.ErrnoException) => {
-			indexName = pathName.replace(/.js$/, '/index.js');
-			return(
-				Promise.promisify(fs.stat)(
-					url2path(indexName)
-				).then((stats: fs.Stats) => {
-					// TODO: test on Windows
-					fixTbl['./' + path.relative(basePath, url2path(pathName))] = './' + path.relative(basePath, url2path(indexName));
-					return(indexName);
-				}).catch((err: NodeJS.ErrnoException) =>
-					findPackage(name, parentName)
-				).catch((err: any) =>
-					pathName
-				)
-			);
-		}));
-	}
-
-	var built: Promise<Builder.BuildResult>;
-	var sourceUrl = path2url(sourcePath);
+	let built: Promise<Builder.BuildResult>;
+	const sourceUrl = path2url(sourcePath);
 
 	// Run systemjs-builder.
 
-	if(options.sfx) {
-		if(bundlePath) built = builder.buildStatic(sourceUrl, bundlePath, {});
-		else built = builder.buildStatic(sourceUrl, {});
-	} else {
-		if(bundlePath) built = builder.bundle(sourceUrl, bundlePath, {});
-		else built = builder.bundle(sourceUrl, {});
-	}
+	let build = options.sfx ? builder.buildStatic : builder.bundle;
+
+	const buildArguments = ([] as any[]).concat(
+		[ sourceUrl ],
+		(bundlePath ? [bundlePath] : []),
+		[{}]
+	);
+
+	built = build.apply(builder, buildArguments);
 
 	return(built.then(() =>
 
@@ -250,7 +265,7 @@ export function build(basePath: string, options?: BuildOptions) {
 
 export interface Branch extends Array<string | Branch> {
 	/** File name. */
-	0?: string
+	0?: string;
 }
 
 /** Extract a dependency tree from the build function result object.
@@ -259,13 +274,13 @@ export interface Branch extends Array<string | Branch> {
   * Uses Breadth-First Search to print shortest import chain to each file. */
 
 export function makeTree(result: Builder.BuildResult) {
-	var output: Branch = [''];
-	var queue: string[] = [];
-	var found: { [name: string]: Branch } = {};
+	const output: Branch = [''];
+	const queue: string[] = [];
+	const found: { [name: string]: Branch } = {};
 
 	function report(name: string, branch: Branch) {
 		if(!found[name]) {
-			var leaf: Branch = [name];
+			const leaf: Branch = [name];
 			found[name] = leaf;
 
 			branch.push(leaf);
@@ -273,18 +288,18 @@ export function makeTree(result: Builder.BuildResult) {
 		}
 	}
 
-	var entryPoints = result.entryPoints;
+	let entryPoints = result.entryPoints;
 
 	if(!entryPoints) {
 		// Bundling reported no entry points (maybe it's an sfx bundle).
 		// Create a table of all modules that were imported somehow.
 
-		var importedTbl: { [name: string]: boolean } = {};
+		const importedTbl: { [name: string]: boolean } = {};
 
-		for(var name of Object.keys(result.tree)) {
-			var item = result.tree[name];
+		for(let name of Object.keys(result.tree)) {
+			const item = result.tree[name];
 
-			for(var dep of item.deps) {
+			for(let dep of item.deps) {
 				importedTbl[item.depMap[dep]] = true;
 			}
 		}
@@ -294,14 +309,14 @@ export function makeTree(result: Builder.BuildResult) {
 		entryPoints = Object.keys(result.tree).filter((name: string) => !importedTbl[name]);
 	}
 
-	for(var name of entryPoints) report(name, output);
+	for(let name of entryPoints) report(name, output);
 
 	while(queue.length) {
-		var name = queue.shift();
-		var branch = found[name];
-		var item = result.tree[name];
+		const name = queue.shift();
+		const branch = found[name];
+		const item = result.tree[name];
 
-		for(var dep of item.deps) report(item.depMap[dep], branch);
+		for(let dep of item.deps) report(item.depMap[dep], branch);
 	}
 
 	return(output);

@@ -7,17 +7,22 @@ import * as cmd from 'commander';
 import {build, BuildResult, makeTree, Branch} from './cbuild';
 
 type _ICommand = typeof cmd;
-interface ICommand extends _ICommand {
-	arguments(spec: string): ICommand;
+interface Command extends _ICommand {
+	arguments(spec: string): Command;
 }
 
 function parseBool(flag: string) {
-	var falseTbl: { [key: string]: boolean } = {
+	const falseTbl: { [key: string]: boolean } = {
 		'0': true,
 		'no': true,
 		'false': true
-	}
+	};
+
 	return(!flag || !falseTbl[flag.toLowerCase()]);
+}
+
+function parseList(item: string, list: string[]) {
+	return(list.concat([item]));
 }
 
 /** Wrap output in ANSI escape sequences to show it in given color. */
@@ -25,18 +30,23 @@ function parseBool(flag: string) {
 function paint(text: string, color: number, bold?: boolean) {
 	if(!process.stdout || !(process.stdout as any).isTTY) return(text);
 
-	return('\u001b[' + (bold ? '1;' : '') + color + 'm' + text + '\u001b[' + (bold ? '22;' : '') + '39m');
+	return(
+		'\u001b[' + (bold ? '1;' : '') + color + 'm' +
+		text +
+		'\u001b[' + (bold ? '22;' : '') + '39m'
+	);
 }
 
 /** Print dependency tree of bundled files. */
 
+// tslint:disable-next-line:typedef
 function printTree(root: Branch, indent = '') {
-	var output: string[] = [];
-	var index = 0;
+	const output: string[] = [];
+	let index = 0;
 
 	if(root[0]) output.push(indent + paint(root[0], 36));
 
-	for(var child of root) {
+	for(let child of root) {
 		if(index++ > 0) {
 			output.push.apply(output, printTree(child as Branch, indent + '  '));
 		}
@@ -45,15 +55,18 @@ function printTree(root: Branch, indent = '') {
 	return(output);
 }
 
-((cmd.version(require('../package.json').version) as ICommand)
+((cmd.version(require('../package.json').version) as Command)
 	.description('SystemJS node module bundling tool')
 	.option('-d, --debug [flag]', 'use development environment', parseBool)
-	.option('-m, --map <package>', 'add package to mappings', (item: string, list: string[]) => list.concat([item]), [])
+	.option('-m, --map <package>', 'add package to mappings',
+		parseList, [])
 	.option('-s, --source <file>', 'main JavaScript source to bundle')
-	.option('-p, --package <path>', 'directory with package.json and config.js', process.cwd())
+	.option('-p, --package <path>', 'directory with package.json and config.js',
+		process.cwd())
 	.option('-o, --out <file>', 'write output bundle to file')
 	.option('-C, --out-config <file>', 'write path mappings to new config file')
-	.option('-I, --include-config <file>', 'merge another file into new config file', (item: string, list: string[]) => list.concat([item]), [])
+	.option('-I, --include-config <file>', 'merge another file into new config file',
+		parseList, [])
 	.option('-q, --quiet [flag]', 'suppress terminal output', parseBool)
 	.option('-v, --verbose [flag]', 'print dependency tree of bundled files', parseBool)
 	.option('-x, --static [flag]', 'create static (sfx) bundle', parseBool)
@@ -64,14 +77,16 @@ if(process.argv.length < 3) cmd.help();
 
 handleBundle(cmd.opts());
 
+/* tslint:disable:no-console */
+
 function handleBundle(opts: { [key: string]: any }) {
-	var basePath = path.resolve('.', opts['package']);
-	var sourcePath: string = opts['source'];
-	var env = process.env['NODE_ENV'];
-	var debug: boolean = opts['debug'];
-	var quiet: boolean = opts['quiet'];
-	var verbose: boolean = opts['verbose'];
-	var sfx: boolean = opts['static'];
+	const basePath = path.resolve('.', opts['package']);
+	let sourcePath: string = opts['source'];
+	const env = process.env['NODE_ENV'];
+	let debug: boolean = opts['debug'];
+	const quiet: boolean = opts['quiet'];
+	const verbose: boolean = opts['verbose'];
+	const sfx: boolean = opts['static'];
 
 	if(sourcePath) sourcePath = path.resolve('.', sourcePath);
 	if(env == 'development') debug = true;
@@ -85,13 +100,13 @@ function handleBundle(opts: { [key: string]: any }) {
 	}
 
 	build(basePath, {
-		debug: debug,
-		sfx: sfx,
 		bundlePath: opts['out'],
-		sourcePath: sourcePath,
-		outConfigPath: opts['outConfig'],
+		debug: debug,
 		includeConfigList: opts['includeConfig'],
-		mapPackages: opts['map']
+		mapPackages: opts['map'],
+		outConfigPath: opts['outConfig'],
+		sfx: sfx,
+		sourcePath: sourcePath
 	}).then((result: BuildResult) => {
 		if(!quiet) {
 			if(verbose) {
@@ -99,10 +114,10 @@ function handleBundle(opts: { [key: string]: any }) {
 			}
 			console.log('\nBuild complete!');
 		}
-	}).catch((err) => {
+	}).catch((err: any) => {
 		if(!quiet) {
-			console.log('\nBuild error:');
-			console.log(err.stack);
+			console.error('\nBuild error:');
+			console.error(err.stack);
 		}
 
 		process.exit(1);
