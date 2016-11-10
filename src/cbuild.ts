@@ -126,7 +126,7 @@ const resolveAsync = Promise.promisify(resolve);
 /** Bundle files from package in basePath according to options. */
 
 export function build(basePath: string, options?: BuildOptions) {
-	const builder = new Builder(path2url(basePath), 'config.js');
+	const builder = new Builder(path2url(basePath), path.resolve(basePath, 'config.js'));
 	const pathTbl: { [name: string]: string } = {};
 	const fixTbl: { [path: string]: string } = {};
 	const repoTbl: { [path: string]: boolean } = {};
@@ -135,15 +135,17 @@ export function build(basePath: string, options?: BuildOptions) {
 	  * browser fields of the required and requiring packages). */
 
 	function findPackage(name: string, parentName: string) {
-		return(resolveAsync(name, { filename: url2path(parentName) }).then((pathName: string) => {
+		const parentPath = url2path(parentName);
+
+		return(resolveAsync(name, { filename: parentPath }).then((pathName: string) => {
 			if(pathName == name) throw(new Error('Internal module'));
-			pathName = path2url(path.relative(basePath, pathName));
+			const relative = path2url(path.relative(basePath, pathName));
 
 			// Store entry point path for this package name.
-			pathTbl[name] = pathName;
+			pathTbl[name] = relative;
 
 			// Store path of top node_modules directory.
-			repoTbl[pathName.replace(/((\/|^)node_modules)\/.*/i, '$1')] = true;
+			repoTbl[relative.replace(/((\/|^)node_modules)\/.*/i, '$1')] = true;
 
 			return(pathName);
 		}));
