@@ -1,5 +1,4 @@
-cbuild
-======
+![cbuild](doc/logo.png)
 
 [![build status](https://travis-ci.org/charto/cbuild.svg?branch=master)](http://travis-ci.org/charto/cbuild)
 [![dependency status](https://david-dm.org/charto/cbuild.svg)](https://david-dm.org/charto/cbuild)
