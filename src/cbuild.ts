@@ -33,36 +33,73 @@ export interface BuildOptions {
 	mapPackages?: string[];
 }
 
+interface PackageSpec {
+	entryPath?: string;
+	rootPath: string;
+}
+
 function writeConfig(
 	options: BuildOptions,
-	pathTbl: { [name: string]: string },
+	repoTbl: { [path: string]: { [name: string]: PackageSpec } },
 	fixTbl: { [path: string]: string },
-	repoList: string[],
 	shimPath: string
 ) {
 	const sectionList: string[] = [];
 	const fixList = Object.keys(fixTbl);
 
+	const packageTbl: { [name: string]: PackageSpec } = {};
+
+	for(let repoPath of Object.keys(repoTbl)) {
+		const repo = repoTbl[repoPath];
+
+		for(let packageName of Object.keys(repo)) {
+			const spec = repo[packageName];
+			packageTbl[packageName] = spec;
+		}
+	}
+
 	// Output table mapping npm package names to their main entry points.
 
 	sectionList.push(
 		'\tmap: {\n' +
-		Object.keys(pathTbl).map((name: string) =>
-			'\t\t"' + name + '": "' + pathTbl[name] + '"'
+		Object.keys(packageTbl).sort().map((name: string) =>
+			'\t\t"' + name + '": "' + packageTbl[name].rootPath + '"'
 		).join(',\n') + '\n' +
 		'\t}'
 	);
 
 	// Output meta command to inject a global process variable to all files
 	// under all encountered node_modules trees.
-
-	sectionList.push(
-		'\tmeta: {\n' +
-		repoList.map((path: string) =>
-			'\t\t"' + path + '/*": { globals: { process: "' + shimPath + '" } }'
-		).join(',\n') + '\n' +
+	sectionList.push([
+		'\tmeta: {',
+		Object.keys(repoTbl).sort().map((repoPath: string) =>
+			'\t\t"' + repoPath + '/*": { globals: { process: "' + shimPath + '" } }'
+		).join(',\n'),
 		'\t}'
-	);
+	].join('\n'));
+
+	sectionList.push([
+		'\tpackages: {',
+		'\t\t".": {',
+		'\t\t\tmap: {',
+		fixList.map((path: string) =>
+			'\t\t\t\t"' + path + '": "' + fixTbl[path] + '"'
+		).join(',\n'),
+		'\t\t\t}',
+		'\t\t},',
+		/* Object.keys(repoTbl).sort().map((repoPath: string) => [
+			'\t\t"' + repoPath + '/": {',
+			'\t\t\tdefaultExtension: "js"',
+			'\t\t}'
+		].join('\n')).concat( */
+			Object.keys(packageTbl).sort().map((name: string) => {
+				const entryPath = packageTbl[name].entryPath;
+				return(entryPath && '\t\t"' + name + '": { main: "' + entryPath + '" }');
+			}).filter((row: string | undefined) => row)
+		/* ) */.join(',\n'),
+
+		'\t}'
+	].join('\n'));
 
 	// Output a list of fixes to file paths, mainly to append index.js
 	// where a directory is being imported.
@@ -121,33 +158,61 @@ function path2url(nativePath: string) {
 	return(urlPath.replace(/^\//, 'file:///'));
 }
 
-const resolveAsync = Promise.promisify(resolve);
-
 /** Bundle files from package in basePath according to options. */
 
 export function build(basePath: string, options?: BuildOptions) {
-	const builder = new Builder(path2url(basePath), path.resolve(basePath, 'config.js'));
-	const pathTbl: { [name: string]: string } = {};
+	// Avoid using the imported Builder. Otherwise it gets executed when this
+	// file loads and the caller won't have time to use process.chdir()
+	// before builder gets its (unchangeable) base path from process.cwd().
+	const BuilderClass = require('systemjs-builder') as typeof Builder;
+	const builder = new BuilderClass(path2url(basePath), path.resolve(basePath, 'config.js'));
 	const fixTbl: { [path: string]: string } = {};
-	const repoTbl: { [path: string]: boolean } = {};
+	const repoTbl: { [path: string]: { [name: string]: PackageSpec } } = {};
+
+	const resolveAsync = Promise.promisify(resolve);
 
 	/** Find the main entry point to an npm package (considering package.json
 	  * browser fields of the required and requiring packages). */
 
 	function findPackage(name: string, parentName: string) {
-		const parentPath = url2path(parentName);
+		let rootName: string;
+		let rootPath: string;
 
-		return(resolveAsync(name, { filename: parentPath }).then((pathName: string) => {
+		const resolveOptions = {
+			filename: url2path(parentName),
+			packageFilter: (json: any, jsonPath: string) => {
+				rootName = json.name;
+				rootPath = path.dirname(jsonPath);
+				return(json);
+			}
+		};
+
+		return(resolveAsync(name, resolveOptions).then((pathName: string) => {
 			if(pathName == name) throw(new Error('Internal module'));
-			const relative = path2url(path.relative(basePath, pathName));
 
-			// Store entry point path for this package name.
-			pathTbl[name] = relative;
+			let spec: PackageSpec;
 
-			// Store path of top node_modules directory.
-			repoTbl[relative.replace(/((\/|^)node_modules)\/.*/i, '$1')] = true;
+			if(rootName == name) {
+				spec = {
+					entryPath: path2url(path.relative(rootPath, pathName)),
+					rootPath: path2url(path.relative(basePath, rootPath))
+				};
+			} else {
+				spec = {
+					rootPath: path2url(path.relative(basePath, pathName))
+				};
+			}
 
-			return(pathName);
+			const repoPath = spec.rootPath.replace(/((\/|^)node_modules)\/.*/i, '$1');
+
+			// Store in repository corresponding to top node_modules directory.
+			let specTbl = repoTbl[repoPath];
+			if(!specTbl) repoTbl[repoPath] = specTbl = {};
+
+			// Store path and entry point for this package name.
+			specTbl[name] = spec;
+
+			return(path2url(path.relative(basePath, pathName)));
 		}));
 	}
 
@@ -248,6 +313,7 @@ export function build(basePath: string, options?: BuildOptions) {
 		[{}]
 	);
 
+	// Call systemjs-builder.
 	built = makeBundle.apply(builder, buildArguments);
 
 	return(built.then(() =>
@@ -275,9 +341,8 @@ export function build(basePath: string, options?: BuildOptions) {
 				).then((shimPath: string) =>
 					writeConfig(
 						options,
-						pathTbl,
+						repoTbl,
 						fixTbl,
-						Object.keys(repoTbl),
 						path.relative(basePath, shimPath)
 					)
 				)

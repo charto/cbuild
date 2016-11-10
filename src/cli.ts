@@ -99,12 +99,20 @@ function handleBundle(opts: { [key: string]: any }) {
 		);
 	}
 
+	let bundlePath = opts['out'];
+	let outConfigPath = opts['outConfig'];
+
+	if(bundlePath) bundlePath = path.resolve('.', bundlePath);
+	if(outConfigPath) outConfigPath = path.resolve('.', outConfigPath);
+
+	process.chdir(basePath);
+
 	build(basePath, {
-		bundlePath: opts['out'],
+		bundlePath: bundlePath,
 		debug: debug,
 		includeConfigList: opts['includeConfig'],
 		mapPackages: opts['map'],
-		outConfigPath: opts['outConfig'],
+		outConfigPath: outConfigPath,
 		sfx: sfx,
 		sourcePath: sourcePath
 	}).then((result: BuildResult) => {
