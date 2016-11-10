@@ -10,9 +10,7 @@
 		"target": "es5"
 	},
 	"files": [
-		"../typings/index.d.ts",
-
-		"typings-custom.d.ts",
+		"typings.d.ts",
 		"cbuild.ts",
 		"cli.ts"
 	]
