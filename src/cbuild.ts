@@ -147,7 +147,7 @@ export function build(basePath: string, options?: BuildOptions) {
 	function newNormalize(
 		name: string,
 		parentName: string,
-		parentAddress:string,
+		parentAddress: string,
 		pathName: string
 	) {
 		const indexName = pathName.replace(/.js$/, '/index.js');
@@ -218,7 +218,9 @@ export function build(basePath: string, options?: BuildOptions) {
 				return(Promise.promisify(fs.stat)(url2path(pathName)));
 			}).then((stats: fs.Stats) =>
 				pathName
-			).catch((err: NodeJS.ErrnoException) => newNormalize(name, parentName, parentAddress, pathName))
+			).catch((err: NodeJS.ErrnoException) =>
+				newNormalize(name, parentName, parentAddress, pathName)
+			)
 		);
 	};
 
