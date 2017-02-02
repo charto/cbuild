@@ -14,8 +14,8 @@ interface Command extends _ICommand {
 function parseBool(flag: string) {
 	const falseTbl: { [key: string]: boolean } = {
 		'0': true,
-		'no': true,
-		'false': true
+		'false': true,
+		'no': true
 	};
 
 	return(!flag || !falseTbl[flag.toLowerCase()]);

@@ -25,17 +25,17 @@
   },
   "homepage": "https://github.com/charto/cbuild#readme",
   "dependencies": {
-    "bluebird": "^3.4.6",
+    "@types/bluebird": "^3.0.37",
+    "@types/commander": "^2.3.31",
+    "@types/node": "^7.0.4",
+    "bluebird": "^3.4.7",
     "browser-resolve": "~1.11.2",
     "commander": "~2.9.0",
-    "systemjs-builder": "~0.15.33"
+    "systemjs-builder": "~0.16.2"
   },
   "devDependencies": {
-    "@types/bluebird": "^3.0.35",
-    "@types/commander": "^2.3.30",
-    "@types/node": "^6.0.46",
     "docts": "~0.1.0",
-    "tslint": "^3.15.1",
-    "typescript": "^2.0.8"
+    "tslint": "^4.4.2",
+    "typescript": "^2.1.5"
   }
 }
