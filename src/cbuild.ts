@@ -109,7 +109,9 @@ function writeConfig(
 	sectionList.push([
 		'\tmeta: {',
 		Object.keys(repoTbl).sort().map((repoPath: string) =>
-			'\t\t"' + repoPath + '/*": { globals: { process: "' + path.relative(basePath, shimPath) + '" } }'
+			'\t\t"' + repoPath + '/' + '*": { ' +
+			'globals: { process: "' + path.relative(basePath, shimPath) + '" } ' +
+			'}'
 		).join(',\n'),
 		'\t}'
 	].join('\n'));
@@ -118,21 +120,21 @@ function writeConfig(
 		'\tpackages: {',
 			Object.keys(packageTbl).sort().map((name: string) => {
 				const entryPath = packageTbl[name].entryPath;
-				const fixTbl = packageTbl[name].fixTbl;
+				const packageFixTbl = packageTbl[name].fixTbl;
 
-				if(!entryPath && !fixTbl) return(null);
+				if(!entryPath && !packageFixTbl) return(null);
 
 				const result = [];
 
 				if(entryPath) result.push('\t\t\tmain: "' + entryPath + '"');
-				if(fixTbl) {
+				if(packageFixTbl) {
 					// Output a list of fixes to file paths, mainly to append index.js
 					// where a directory is being imported.
 
 					result.push([
 						'\t\t\tmap: {',
-						Object.keys(fixTbl).map(
-							(fix: string) => '\t\t\t\t"' + fix + '": "' + fixTbl[fix] + '"'
+						Object.keys(packageFixTbl).map(
+							(fix: string) => '\t\t\t\t"' + fix + '": "' + packageFixTbl[fix] + '"'
 						).join(',\n'),
 						'\t\t\t}'
 					].join('\n'));
@@ -226,13 +228,13 @@ export function build(basePath: string, options?: BuildOptions) {
 			if(rootName == name) {
 				spec = {
 					entryPath: path2url(path.relative(rootPath, pathName)),
-					rootPath: path2url(path.relative(basePath, rootPath)),
-					fullRootPath: rootPath
+					fullRootPath: rootPath,
+					rootPath: path2url(path.relative(basePath, rootPath))
 				};
 			} else {
 				spec = {
-					rootPath: path2url(path.relative(basePath, pathName)),
-					fullRootPath: rootPath
+					fullRootPath: rootPath,
+					rootPath: path2url(path.relative(basePath, pathName))
 				};
 			}
 
