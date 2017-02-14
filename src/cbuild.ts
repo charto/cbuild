@@ -52,6 +52,7 @@ function writeConfig(
 
 	const packageTbl: { [name: string]: PackageSpec } = {};
 
+	/** Virtual directory tree for finding which package contains which file. */
 	const packageTree = {};
 	let node: any;
 
@@ -61,6 +62,8 @@ function writeConfig(
 		for(let packageName of Object.keys(repo)) {
 			const spec = repo[packageName];
 			packageTbl[packageName] = spec;
+
+			// Add package path to virtual directory tree.
 
 			node = packageTree;
 
@@ -73,10 +76,13 @@ function writeConfig(
 		}
 	}
 
+	// Find a containing package for each path that needed fixing,
+	// to add mappings into config for that package.
+
 	for(let fix of fixList) {
 		node = packageTree;
 
-		for(let part of path.relative(basePath, fix).split('/')) {
+		for(let part of path2url(path.relative(basePath, fix)).split('/')) {
 			if(!node[part]) break;
 			node = node[part];
 		}
@@ -87,8 +93,8 @@ function writeConfig(
 			const spec = packageTbl[packageName];
 			if(!spec.fixTbl) spec.fixTbl = {};
 
-			const before = './' + path.relative(spec.fullRootPath, fix);
-			const after = './' + path.relative(spec.fullRootPath, fixTbl[fix]);
+			const before = './' + path2url(path.relative(spec.fullRootPath, fix));
+			const after = './' + path2url(path.relative(spec.fullRootPath, fixTbl[fix]));
 
 			spec.fixTbl[before] = after;
 		}
@@ -110,7 +116,7 @@ function writeConfig(
 		'\tmeta: {',
 		Object.keys(repoTbl).sort().map((repoPath: string) =>
 			'\t\t"' + repoPath + '/' + '*": { ' +
-			'globals: { process: "' + path.relative(basePath, shimPath) + '" } ' +
+			'globals: { process: "' + path2url(path.relative(basePath, shimPath)) + '" } ' +
 			'}'
 		).join(',\n'),
 		'\t}'
