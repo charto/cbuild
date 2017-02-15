@@ -371,22 +371,17 @@ export function build(basePath: string, options?: BuildOptions) {
 		builder.loader.normalize = oldNormalize;
 
 		if(options.outConfigPath) {
+			const shimName = options.debug ? 'process-dev.js' : 'process.js';
 
 			// Output SystemJS configuration file.
 
 			return(
-				resolveAsync(
-					// TODO: test on Windows
-					options.debug ? 'cbuild/process-dev.js' : 'cbuild/process.js',
-					{ filename: path.resolve(basePath, 'package.json') }
-				).then((shimPath: string) =>
-					writeConfig(
-						options,
-						repoTbl,
-						fixTbl,
-						basePath,
-						shimPath
-					)
+				writeConfig(
+					options,
+					repoTbl,
+					fixTbl,
+					basePath,
+					path.resolve(__dirname, '../' + shimName)
 				)
 			);
 		}
