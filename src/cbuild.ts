@@ -444,7 +444,7 @@ export function makeTree(result: Builder.BuildResult) {
 		for(let name of Object.keys(result.tree)) {
 			const item = result.tree[name];
 
-			for(let dep of item.deps) {
+			for(let dep of item.deps || []) {
 				importedTbl[item.depMap[dep]] = true;
 			}
 		}
@@ -461,7 +461,7 @@ export function makeTree(result: Builder.BuildResult) {
 		const branch = found[name];
 		const item = result.tree[name];
 
-		for(let dep of item.deps) report(item.depMap[dep], branch);
+		for(let dep of item.deps || []) report(item.depMap[dep], branch);
 	}
 
 	return(output);
