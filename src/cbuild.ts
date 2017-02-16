@@ -204,6 +204,7 @@ export function build(basePath: string, options?: BuildOptions) {
 	// file loads and the caller won't have time to use process.chdir()
 	// before builder gets its (unchangeable) base path from process.cwd().
 	const BuilderClass = require('systemjs-builder') as typeof Builder;
+	const testBuilder = new BuilderClass(path2url(basePath), path.resolve(basePath, 'config.js'));
 	const builder = new BuilderClass(path2url(basePath), path.resolve(basePath, 'config.js'));
 	const fixTbl: { [path: string]: string } = {};
 	const repoTbl: { [path: string]: { [name: string]: PackageSpec } } = {};
@@ -309,6 +310,19 @@ export function build(basePath: string, options?: BuildOptions) {
 		);
 	}
 
+	// Prepare a test builder simply to fetch a normalized path
+	// and check if any content was found.
+
+	const testFetch = testBuilder.loader.fetch;
+	const fetchResult: { [address: string]: boolean } = {};
+
+	testBuilder.loader.fetch = function(load: any) {
+		return(testFetch.call(this, load).then((content: string) => {
+			fetchResult[load.address] = true;
+			throw(new Error());
+		}));
+	};
+
 	/** Old systemjs-builder normalize function which doesn't look for npm packages.
 	  * See https://github.com/ModuleLoader/es6-module-loader/wiki/Extending-the-ES6-Loader */
 	const oldNormalize = builder.loader.normalize;
@@ -327,17 +341,21 @@ export function build(basePath: string, options?: BuildOptions) {
 		return(
 			// Call SystemJS normalizer.
 			// tslint:disable-next-line:no-invalid-this
-			oldNormalize.call(this, name, parentName, parentAddress).then((result: string) => {
-				pathName = result;
-				// Test if file actually exists.
-				return(Promise.promisify(fs.stat)(url2path(pathName)));
-			}).then((stats: fs.Stats) =>
-				// If file exists, return normalized path.
+			oldNormalize.call(this, name, parentName, parentAddress).then((result: string) =>
+				// Test if the file actually exists.
+				Promise.promisify(fs.stat)(url2path(pathName = result))
+			).then((stats: fs.Stats) =>
 				pathName
 			).catch((err: NodeJS.ErrnoException) =>
+				// Try to build the file to ensure all loader plugins are executed.
+				testBuilder.bundle(pathName, {})
+			).then(() =>
+				pathName
+			).catch((err: any) => {
+				if(fetchResult.hasOwnProperty(pathName)) return(pathName);
 				// If file doesn't exist, look for a matching npm package.
-				newNormalize(name, parentName, parentAddress, pathName)
-			)
+				return(newNormalize(name, parentName, parentAddress, pathName));
+			})
 		);
 	};
 

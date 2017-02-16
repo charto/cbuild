@@ -45,6 +45,7 @@ declare module 'systemjs-builder' {
 
 	class Loader {
 		normalize(name: string, parentName: string, parentAddress: string): Promise<string>;
+		fetch(load: { name: string, address: string, metadata: any }): Promise<string>;
 
 		map: { [name: string]: string };
 	}
