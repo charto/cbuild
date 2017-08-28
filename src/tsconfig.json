@@ -2,9 +2,11 @@
 	"compilerOptions": {
 		"declaration": true,
 		"experimentalDecorators": true,
+		"lib": [ "es5", "es2015.collection" ],
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"noImplicitAny": true,
+		"noImplicitThis": true,
 		"outDir": "../dist",
 		"removeComments": false,
 		"target": "es5"

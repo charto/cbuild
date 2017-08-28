@@ -44,7 +44,6 @@
 		"no-eval": true,
 		"no-inferrable-types": true,
 		"no-internal-module": true,
-		"no-invalid-this": true,
 		"no-namespace": false,
 		"no-null-keyword": false,
 		"no-reference": true,

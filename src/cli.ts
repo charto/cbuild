@@ -4,7 +4,7 @@
 import * as path from 'path';
 import * as cmd from 'commander';
 
-import {build, BuildResult, makeTree, Branch} from './cbuild';
+import { build, BuildResult, makeTree, Branch } from './cbuild';
 
 type _ICommand = typeof cmd;
 interface Command extends _ICommand {
