@@ -1,6 +1,6 @@
 node_modules/
-typings/
 src/
+package-lock.json
 .travis.yml
 *.log.*
 *.log
