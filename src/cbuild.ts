@@ -228,7 +228,8 @@ export function build(basePath: string, options?: BuildOptions) {
 		};
 
 		return(resolveAsync(name, resolveOptions).then((pathName: string) => {
-			if(pathName == name) throw(new Error('Internal module'));
+			// Handle Node.js internal modules.
+			if(pathName == name) return('@empty');
 
 			let spec: PackageSpec;
 
@@ -444,8 +445,10 @@ export function makeTree(result: Builder.BuildResult) {
 		for(let name of Object.keys(result.tree)) {
 			const item = result.tree[name];
 
-			for(let dep of item.deps || []) {
-				importedTbl[item.depMap[dep]] = true;
+			if(typeof(item) == 'object') {
+				for(let dep of item.deps) {
+					importedTbl[item.depMap[dep]] = true;
+				}
 			}
 		}
 
@@ -461,7 +464,11 @@ export function makeTree(result: Builder.BuildResult) {
 		const branch = found[name];
 		const item = result.tree[name];
 
-		for(let dep of item.deps || []) report(item.depMap[dep], branch);
+		if(typeof(item) == 'object') {
+			for(let dep of item.deps) {
+				report(item.depMap[dep], branch);
+			}
+		}
 	}
 
 	return(output);
