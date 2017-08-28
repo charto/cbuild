@@ -151,7 +151,7 @@ function writeConfig(
 					result.join(',\n'),
 					'\t\t}'
 				].join('\n'));
-			}).filter((row: string | undefined) => row)
+			}).filter((row: string | null) => row)
 		/* ) */.join(',\n'),
 
 		'\t}'
@@ -170,7 +170,7 @@ function writeConfig(
 		''
 	].join('\n');
 
-	return(fs.writeFileSync(options.outConfigPath, output, { encoding: 'utf-8' }));
+	return(fs.writeFileSync(options.outConfigPath!, output, { encoding: 'utf-8' }));
 }
 
 function url2path(urlPath: string) {
@@ -199,7 +199,7 @@ function path2url(nativePath: string) {
 
 /** Bundle files from package in basePath according to options. */
 
-export function build(basePath: string, options?: BuildOptions) {
+export function build(basePath: string, options: BuildOptions = {}) {
 	// Avoid using the imported Builder. Otherwise it gets executed when this
 	// file loads and the caller won't have time to use process.chdir()
 	// before builder gets its (unchangeable) base path from process.cwd().
@@ -292,8 +292,6 @@ export function build(basePath: string, options?: BuildOptions) {
 			)
 		);
 	}
-
-	options = options || {};
 
 	const bundlePath = options.bundlePath;
 	let sourcePath = options.sourcePath;
@@ -411,7 +409,7 @@ export function build(basePath: string, options?: BuildOptions) {
 
 export interface Branch extends Array<string | Branch> {
 	/** File name. */
-	0?: string;
+	0: string;
 }
 
 /** Extract a dependency tree from the build function result object.
@@ -460,7 +458,7 @@ export function makeTree(result: Builder.BuildResult) {
 	for(let name of entryPoints) report(name, output);
 
 	while(queue.length) {
-		const name = queue.shift();
+		const name = queue.shift()!;
 		const branch = found[name];
 		const item = result.tree[name];
 
