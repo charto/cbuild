@@ -57,6 +57,7 @@ function printTree(root: Branch, indent = '') {
 
 ((cmd.version(require('../package.json').version) as Command)
 	.description('SystemJS node module bundling tool')
+	.option('-b, --builder-config <file>', 'specify SystemJS builder configuration file')
 	.option('-d, --debug [flag]', 'use development environment', parseBool)
 	.option('-m, --map <package>', 'add package to mappings',
 		parseList, [])
@@ -81,6 +82,7 @@ handleBundle(cmd.opts());
 
 function handleBundle(opts: { [key: string]: any }) {
 	const basePath = path.resolve('.', opts['package']);
+	let builderPath = opts['builderConfig'];
 	let sourcePath: string = opts['source'];
 	const env = process.env['NODE_ENV'];
 	let debug: boolean = opts['debug'];
@@ -88,6 +90,7 @@ function handleBundle(opts: { [key: string]: any }) {
 	const verbose: boolean = opts['verbose'];
 	const sfx: boolean = opts['static'];
 
+	if(builderPath) builderPath = path.resolve('.', builderPath);
 	if(sourcePath) sourcePath = path.resolve('.', sourcePath);
 	if(env == 'development') debug = true;
 
@@ -108,13 +111,14 @@ function handleBundle(opts: { [key: string]: any }) {
 	process.chdir(basePath);
 
 	build(basePath, {
-		bundlePath: bundlePath,
-		debug: debug,
+		builderPath,
+		bundlePath,
+		debug,
 		includeConfigList: opts['includeConfig'],
 		mapPackages: opts['map'],
-		outConfigPath: outConfigPath,
-		sfx: sfx,
-		sourcePath: sourcePath
+		outConfigPath,
+		sfx,
+		sourcePath
 	}).then((result: BuildResult) => {
 		if(!quiet) {
 			if(verbose) {

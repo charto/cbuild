@@ -1,6 +1,6 @@
 {
   "name": "cbuild",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Use SystemJS with npm instead of jspm",
   "main": "dist/cbuild.js",
   "typings": "dist/cbuild.d.ts",

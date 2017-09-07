@@ -66,17 +66,19 @@ Run `npm run cbuild -- --help` to see the command line options:
 
   Options:
 
-    -h, --help               output usage information
-    -V, --version            output the version number
-    -d, --debug [flag]       use development environment
-    -m, --map <package>      add package to mappings
-    -s, --source <file>      main JavaScript source to bundle
-    -p, --package <path>     directory with package.json and config.js
-    -o, --out <file>         write output bundle to file
-    -C, --out-config <file>  write path mappings to new config file
-    -q, --quiet [flag]       suppress terminal output
-    -v, --verbose [flag]     print dependency tree of bundled files
-    -x, --static [flag]      create static (sfx) bundle
+    -V, --version                output the version number
+    -b, --builder-config <file>  specify SystemJS builder configuration file
+    -d, --debug [flag]           use development environment
+    -m, --map <package>          add package to mappings
+    -s, --source <file>          main JavaScript source to bundle
+    -p, --package <path>         directory with package.json and config.js
+    -o, --out <file>             write output bundle to file
+    -C, --out-config <file>      write path mappings to new config file
+    -I, --include-config <file>  merge another file into new config file
+    -q, --quiet [flag]           suppress terminal output
+    -v, --verbose [flag]         print dependency tree of bundled files
+    -x, --static [flag]          create static (sfx) bundle
+    -h, --help                   output usage information
 ```
 
 API

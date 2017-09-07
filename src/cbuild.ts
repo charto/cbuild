@@ -17,6 +17,9 @@ export interface BuildOptions {
 	/** If true, create static (sfx) bundle. */
 	sfx?: boolean;
 
+	/** Main source file to bundle. */
+	builderPath?: string;
+
 	/** Bundled file to output. */
 	bundlePath?: string;
 
@@ -293,6 +296,7 @@ export function build(basePath: string, options: BuildOptions = {}) {
 		);
 	}
 
+	const builderPath = options.builderPath;
 	const bundlePath = options.bundlePath;
 	let sourcePath = options.sourcePath;
 
@@ -365,11 +369,10 @@ export function build(basePath: string, options: BuildOptions = {}) {
 
 	let makeBundle = options.sfx ? builder.buildStatic : builder.bundle;
 
-	const buildArguments = ([] as any[]).concat(
-		[ sourceUrl ],
-		(bundlePath ? [bundlePath] : []),
-		[{}]
-	);
+	const buildArguments: any[] = [ sourceUrl ];
+
+	if(bundlePath) buildArguments.push(bundlePath);
+	buildArguments.push({ config: builderPath ? require(builderPath) : null });
 
 	// Call systemjs-builder.
 	built = makeBundle.apply(builder, buildArguments);
