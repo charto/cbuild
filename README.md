@@ -81,6 +81,23 @@ Run `npm run cbuild -- --help` to see the command line options:
     -h, --help                   output usage information
 ```
 
+The `--builder-config` option accepts a JSON file containing
+[SystemJS builder bundle options](https://github.com/systemjs/builder/blob/master/docs/api.md#bundle-options) and
+[SystemJS configuration options](https://github.com/systemjs/systemjs/blob/master/docs/config-api.md#configuration-api)
+structured like:
+
+```JavaScript
+{
+	// Bundle options, for example:
+	"minify": true,
+
+	"config": {
+		// Configuration options, for example:
+		"buildCSS": false
+	}
+}
+```
+
 API
 ===
 Docs generated using [`docts`](https://github.com/charto/docts)

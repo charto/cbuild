@@ -372,7 +372,7 @@ export function build(basePath: string, options: BuildOptions = {}) {
 	const buildArguments: any[] = [ sourceUrl ];
 
 	if(bundlePath) buildArguments.push(bundlePath);
-	buildArguments.push({ config: builderPath ? require(builderPath) : null });
+	if(builderPath) buildArguments.push(require(builderPath));
 
 	// Call systemjs-builder.
 	built = makeBundle.apply(builder, buildArguments);
