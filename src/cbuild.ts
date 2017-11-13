@@ -92,6 +92,17 @@ function writeConfig(
 
 		const packageName = node['/name'];
 
+		/*
+		if(!packageName) {
+			console.log('PACKAGE NAME:');
+			packageName = path2url(path.dirname(path.relative(basePath, fix)));
+			const spec = packageTbl[packageName] || (packageTbl[packageName] = {
+				rootPath: '',
+				fullRootPath: path.dirname(fix)
+			});
+		}
+		*/
+
 		if(packageName) {
 			const spec = packageTbl[packageName];
 			if(!spec.fixTbl) spec.fixTbl = {};
@@ -108,8 +119,8 @@ function writeConfig(
 	sectionList.push(
 		'\tmap: {\n' +
 		Object.keys(packageTbl).sort().map((name: string) =>
-			'\t\t"' + name + '": "' + packageTbl[name].rootPath + '"'
-		).join(',\n') + '\n' +
+			packageTbl[name].rootPath && '\t\t"' + name + '": "' + packageTbl[name].rootPath + '"'
+		).filter((name) => name).join(',\n') + '\n' +
 		'\t}'
 	);
 
@@ -220,9 +231,10 @@ export function build(basePath: string, options: BuildOptions = {}) {
 	function findPackage(name: string, parentName: string) {
 		let rootName: string;
 		let rootPath: string;
+		const parentPath = url2path(parentName);
 
 		const resolveOptions = {
-			filename: url2path(parentName),
+			filename: parentPath,
 			packageFilter: (json: any, jsonPath: string) => {
 				rootName = json.name;
 				rootPath = path.dirname(jsonPath);
@@ -252,11 +264,14 @@ export function build(basePath: string, options: BuildOptions = {}) {
 			const repoPath = spec.rootPath.replace(/((\/|^)node_modules)\/.*/i, '$1');
 
 			// Store in repository corresponding to top node_modules directory.
-			let specTbl = repoTbl[repoPath];
-			if(!specTbl) repoTbl[repoPath] = specTbl = {};
+			const specTbl = repoTbl[repoPath] || (repoTbl[repoPath] = {});
 
-			// Store path and entry point for this package name.
-			specTbl[name] = spec;
+			if(name.charAt(0) == '.') {
+				fixTbl[path.resolve(path.dirname(parentPath), name)] = pathName;
+			} else {
+				// Store path and entry point for this package name.
+				specTbl[name] = spec;
+			}
 
 			return(path2url(path.relative(basePath, pathName)));
 		}));
