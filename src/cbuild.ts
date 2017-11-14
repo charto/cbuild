@@ -120,7 +120,7 @@ function writeConfig(
 		'\tmap: {\n' +
 		Object.keys(packageTbl).sort().map((name: string) =>
 			packageTbl[name].rootPath && '\t\t"' + name + '": "' + packageTbl[name].rootPath + '"'
-		).filter((name) => name).join(',\n') + '\n' +
+		).filter((name: string) => name).join(',\n') + '\n' +
 		'\t}'
 	);
 

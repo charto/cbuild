@@ -1,6 +1,6 @@
 {
   "name": "cbuild",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Use SystemJS with npm instead of jspm",
   "main": "dist/cbuild.js",
   "typings": "dist/cbuild.d.ts",
@@ -10,7 +10,7 @@
   "scripts": {
     "tsc": "tsc",
     "docts": "docts",
-    "lint": "tslint --type-check -c src/tslint.json -p src/tsconfig.json",
+    "lint": "tslint -c src/tslint.json -p src/tsconfig.json",
     "prepublish": "npm run lint && tsc -p src",
     "test": "node cbuild --help"
   },
@@ -25,16 +25,16 @@
   },
   "homepage": "https://github.com/charto/cbuild#readme",
   "dependencies": {
-    "@types/bluebird": "^3.5.8",
-    "@types/commander": "^2.9.2",
-    "@types/node": "^8.0.26",
-    "bluebird": "^3.5.0",
+    "@types/bluebird": "^3.5.18",
+    "@types/commander": "^2.11.0",
+    "@types/node": "^8.0.51",
+    "bluebird": "^3.5.1",
     "browser-resolve": "~1.11.2",
     "commander": "~2.11.0",
-    "systemjs-builder": "~0.16.10"
+    "systemjs-builder": "~0.16.12"
   },
   "devDependencies": {
-    "tslint": "^5.7.0",
-    "typescript": "^2.5.2"
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.1"
   }
 }
