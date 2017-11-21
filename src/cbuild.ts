@@ -90,18 +90,15 @@ function writeConfig(
 			node = node[part];
 		}
 
-		const packageName = node['/name'];
+		let packageName = node['/name'];
 
-		/*
 		if(!packageName) {
-			console.log('PACKAGE NAME:');
 			packageName = path2url(path.dirname(path.relative(basePath, fix)));
 			const spec = packageTbl[packageName] || (packageTbl[packageName] = {
-				rootPath: '',
-				fullRootPath: path.dirname(fix)
+				fullRootPath: path.dirname(fix),
+				rootPath: ''
 			});
 		}
-		*/
 
 		if(packageName) {
 			const spec = packageTbl[packageName];
