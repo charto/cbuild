@@ -1,4 +1,4 @@
-// This file is part of cbuild, copyright (c) 2016 BusFaster Ltd.
+// This file is part of cbuild, copyright (c) 2016-2018 BusFaster Ltd.
 // Released under the MIT license, see LICENSE.
 
 import * as fs from 'fs';
@@ -6,7 +6,9 @@ import * as path from 'path';
 import * as Promise from 'bluebird';
 import * as Builder from 'systemjs-builder';
 import * as resolve from 'browser-resolve';
-export {BuildResult, BuildItem} from 'systemjs-builder';
+export { BuildResult, BuildItem } from 'systemjs-builder';
+
+const resolveAsync = Promise.promisify(resolve);
 
 /** Options object for the build function. */
 
@@ -36,7 +38,7 @@ export interface BuildOptions {
 	mapPackages?: string[];
 }
 
-interface PackageSpec {
+export interface PackageSpec {
 	entryPath?: string;
 	rootPath: string;
 	fullRootPath: string;
@@ -184,7 +186,7 @@ function writeConfig(
 	return(fs.writeFileSync(options.outConfigPath!, output, { encoding: 'utf-8' }));
 }
 
-function url2path(urlPath: string) {
+export function url2path(urlPath: string) {
 	let nativePath = urlPath.replace(/^file:\/\//, '');
 
 	if(path.sep != '/') {
@@ -195,7 +197,7 @@ function url2path(urlPath: string) {
 	return(nativePath);
 }
 
-function path2url(nativePath: string) {
+export function path2url(nativePath: string) {
 	let urlPath = nativePath;
 
 	if(path.sep != '/') {
@@ -206,6 +208,66 @@ function path2url(nativePath: string) {
 	}
 
 	return(urlPath.replace(/^\//, 'file:///'));
+}
+
+/** Find the main entry point to an npm package (considering package.json
+  * browser fields of the required and requiring packages). */
+
+export function findPackage(
+	name: string,
+	parentName: string,
+	basePath: string,
+	fixTbl?: { [path: string]: string },
+	repoTbl?: { [path: string]: { [name: string]: PackageSpec } }
+) {
+	let rootName: string;
+	let rootPath: string;
+	const parentPath = url2path(parentName);
+
+	const resolveOptions = {
+		filename: parentPath,
+		packageFilter: (json: any, jsonPath: string) => {
+			rootName = json.name;
+			rootPath = path.dirname(jsonPath);
+			return(json);
+		}
+	};
+
+	return(resolveAsync(name, resolveOptions).then((pathName: string) => {
+		// Handle Node.js internal modules.
+		if(pathName == name) return('@empty');
+
+		let spec: PackageSpec;
+
+		if(rootName == name) {
+			spec = {
+				entryPath: path2url(path.relative(rootPath, pathName)),
+				fullRootPath: rootPath,
+				rootPath: path2url(path.relative(basePath, rootPath))
+			};
+		} else {
+			spec = {
+				fullRootPath: rootPath,
+				rootPath: path2url(path.relative(basePath, pathName))
+			};
+		}
+
+		if(fixTbl && repoTbl) {
+			const repoPath = spec.rootPath.replace(/((\/|^)node_modules)\/.*/i, '$1');
+
+			// Store in repository corresponding to top node_modules directory.
+			const specTbl = repoTbl[repoPath] || (repoTbl[repoPath] = {});
+
+			if(name.charAt(0) == '.') {
+				fixTbl[path.resolve(path.dirname(parentPath), name)] = pathName;
+			} else {
+				// Store path and entry point for this package name.
+				specTbl[name] = spec;
+			}
+		}
+
+		return(path2url(path.relative(basePath, pathName)));
+	}));
 }
 
 /** Bundle files from package in basePath according to options. */
@@ -219,60 +281,6 @@ export function build(basePath: string, options: BuildOptions = {}) {
 	const builder = new BuilderClass(path2url(basePath), path.resolve(basePath, 'config.js'));
 	const fixTbl: { [path: string]: string } = {};
 	const repoTbl: { [path: string]: { [name: string]: PackageSpec } } = {};
-
-	const resolveAsync = Promise.promisify(resolve);
-
-	/** Find the main entry point to an npm package (considering package.json
-	  * browser fields of the required and requiring packages). */
-
-	function findPackage(name: string, parentName: string) {
-		let rootName: string;
-		let rootPath: string;
-		const parentPath = url2path(parentName);
-
-		const resolveOptions = {
-			filename: parentPath,
-			packageFilter: (json: any, jsonPath: string) => {
-				rootName = json.name;
-				rootPath = path.dirname(jsonPath);
-				return(json);
-			}
-		};
-
-		return(resolveAsync(name, resolveOptions).then((pathName: string) => {
-			// Handle Node.js internal modules.
-			if(pathName == name) return('@empty');
-
-			let spec: PackageSpec;
-
-			if(rootName == name) {
-				spec = {
-					entryPath: path2url(path.relative(rootPath, pathName)),
-					fullRootPath: rootPath,
-					rootPath: path2url(path.relative(basePath, rootPath))
-				};
-			} else {
-				spec = {
-					fullRootPath: rootPath,
-					rootPath: path2url(path.relative(basePath, pathName))
-				};
-			}
-
-			const repoPath = spec.rootPath.replace(/((\/|^)node_modules)\/.*/i, '$1');
-
-			// Store in repository corresponding to top node_modules directory.
-			const specTbl = repoTbl[repoPath] || (repoTbl[repoPath] = {});
-
-			if(name.charAt(0) == '.') {
-				fixTbl[path.resolve(path.dirname(parentPath), name)] = pathName;
-			} else {
-				// Store path and entry point for this package name.
-				specTbl[name] = spec;
-			}
-
-			return(path2url(path.relative(basePath, pathName)));
-		}));
-	}
 
 	function newNormalize(
 		name: string,
@@ -301,7 +309,7 @@ export function build(basePath: string, options: BuildOptions = {}) {
 
 				return(indexName);
 			}).catch((err: NodeJS.ErrnoException) =>
-				findPackage(name, parentName)
+				findPackage(name, parentName, basePath, fixTbl, repoTbl)
 			).catch((err: any) =>
 				pathName
 			)
@@ -394,7 +402,7 @@ export function build(basePath: string, options: BuildOptions = {}) {
 		// Add mappings to any extra packages listed in command line options.
 
 		Promise.map(options.mapPackages || [], (name: string) =>
-			findPackage(name, path.resolve(basePath, 'package.json'))
+			findPackage(name, path.resolve(basePath, 'package.json'), basePath, fixTbl, repoTbl)
 		)
 	).then(() => {
 
