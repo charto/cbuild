@@ -1,6 +1,6 @@
 {
   "name": "cbuild",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Use SystemJS with npm instead of jspm",
   "main": "dist/cbuild.js",
   "typings": "dist/cbuild.d.ts",
@@ -25,16 +25,15 @@
   },
   "homepage": "https://github.com/charto/cbuild#readme",
   "dependencies": {
-    "@types/bluebird": "^3.5.18",
-    "@types/commander": "^2.11.0",
-    "@types/node": "^8.0.51",
+    "@types/bluebird": "^3.5.20",
+    "@types/node": "^9.4.0",
     "bluebird": "^3.5.1",
     "browser-resolve": "~1.11.2",
-    "commander": "~2.11.0",
+    "commander": "~2.13.0",
     "systemjs-builder": "~0.16.12"
   },
   "devDependencies": {
     "tslint": "^5.8.0",
-    "typescript": "^2.6.1"
+    "typescript": "^2.6.2"
   }
 }
